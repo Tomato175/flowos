@@ -99,6 +99,7 @@ export async function loadFromCloud(userId: string) {
         id: h.id, name: h.name, icon: h.icon, color: h.color,
         frequencyType: h.frequency_type, frequencyCount: h.frequency_count,
         reminderTime: h.reminder_time, isArchived: h.is_archived || false,
+        createdAt: h.created_at || new Date().toISOString(),
       })),
       (habitLogsResult.data || []).map((l: any) => ({
         habitId: l.habit_id, date: l.logged_date, completed: l.completed,
