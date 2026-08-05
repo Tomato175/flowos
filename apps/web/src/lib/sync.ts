@@ -69,6 +69,7 @@ export async function loadFromCloud(userId: string) {
       id: o.id, title: o.title, description: o.description || '',
       timePeriod: o.time_period || '2026-Q3', color: o.color || '#7C3AED',
       status: o.status || 'active',
+      createdAt: o.created_at || new Date().toISOString(),
       keyResults: (o.key_results || []).map((kr: any) => ({
         id: kr.id, title: kr.title,
         targetValue: kr.target_value, currentValue: kr.current_value,
