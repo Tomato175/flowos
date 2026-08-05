@@ -42,8 +42,17 @@ export function playAmbient(soundId: string, volume: number) {
     customAudioEl = new Audio(soundId);
     customAudioEl.loop = false;
     customAudioEl.volume = masterGain.gain.value;
-    customAudioEl.play().catch(() => {});
+    customAudioEl.preload = 'auto';
+    const playPromise = customAudioEl.play();
+    if (playPromise) {
+      playPromise.catch((err) => {
+        console.warn('Audio play failed:', err.message);
+      });
+    }
     customAudioEl.addEventListener('ended', () => { if (onEndedCallback) onEndedCallback(); });
+    customAudioEl.addEventListener('error', () => {
+      console.warn('Audio load error:', customAudioEl?.error?.message);
+    });
     try {
       const src = c.createMediaElementSource(customAudioEl);
       src.connect(masterGain);
