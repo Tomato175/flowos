@@ -5,11 +5,13 @@ import { useRouter } from 'next/navigation';
 import { useAuth } from '@/lib/auth-context';
 import { isSupabaseReady, migrateFromLocal } from '@/lib/sync';
 import { createClient } from '@/lib/supabase';
+import { useAudioStore } from '@/stores/useAudioStore';
 
 export default function HomePage() {
   const router = useRouter();
   const { user, loading, signIn } = useAuth();
   const supabase = createClient();
+  const syncFromCloud = useAudioStore((s) => s.syncFromCloud);
 
   const [mode, setMode] = useState<'magic' | 'password'>('password');
   const [email, setEmail] = useState('');
@@ -24,7 +26,10 @@ export default function HomePage() {
       const timeoutId = setTimeout(redirect, 3000);
       isSupabaseReady()
         .then((ready) => {
-          if (ready) migrateFromLocal(user.id).then(redirect).catch(redirect);
+          if (ready) {
+            migrateFromLocal(user.id).then(redirect).catch(redirect);
+            syncFromCloud(user.id);
+          }
           else redirect();
         })
         .catch(redirect)

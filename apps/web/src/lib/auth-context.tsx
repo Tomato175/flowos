@@ -54,6 +54,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const signOut = async () => {
     await supabase.auth.signOut();
     setUser(null);
+    // 登出后跳转到首页登录
+    if (typeof window !== 'undefined') window.location.href = '/flowos/';
   };
 
   return (
