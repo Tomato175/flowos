@@ -60,7 +60,17 @@ export const useAudioStore = create<AudioStore>()(
       togglePlay: () => set({ isPlaying: !get().isPlaying }),
       stop: () => set({ isPlaying: false, activeSound: null }),
 
-      addCustomTrack: (track) => set((s) => ({ customTracks: [...s.customTracks, track] })),
+      addCustomTrack: (track) => {
+        const newTracks = [...get().customTracks, track];
+        set({ customTracks: newTracks });
+        // 立即同步写入 localStorage，避免刷新丢失
+        try {
+          const raw = localStorage.getItem('flowos-audio');
+          const existing = raw ? JSON.parse(raw) : {};
+          existing.state = { ...existing.state, customTracks: newTracks };
+          localStorage.setItem('flowos-audio', JSON.stringify(existing));
+        } catch { /* ignore */ }
+      },
       removeCustomTrack: (id) => set((s) => ({ customTracks: s.customTracks.filter((t) => t.id !== id) })),
       syncFromCloud: async (userId: string) => {
         // 从 Supabase Storage 拉取并合并（不覆盖已存在的本地歌曲）
