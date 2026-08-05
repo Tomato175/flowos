@@ -2,9 +2,12 @@
 
 import { useState, useRef } from 'react';
 import { usePhotoStore, type PhotoEntry } from '@/stores/usePhotoStore';
+import { createClient } from '@/lib/supabase';
+import { useAuth } from '@/lib/auth-context';
 
 export default function PhotosPage() {
   const { photos, albums, addPhoto, deletePhoto, setDailyTheme, dailyTheme, getDailyPhoto } = usePhotoStore();
+  const { user } = useAuth();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [uploading, setUploading] = useState(false);
   const [selectedAlbum, setSelectedAlbum] = useState<string | 'all'>('all');
@@ -14,24 +17,49 @@ export default function PhotosPage() {
     ? photos
     : photos.filter((p) => p.albumId === selectedAlbum);
 
-  const handleUpload = (files: FileList | null) => {
+  const handleUpload = async (files: FileList | null) => {
     if (!files || files.length === 0) return;
     setUploading(true);
-    Array.from(files).forEach((file) => {
-      const reader = new FileReader();
-      reader.onload = () => {
-        const dataUrl = reader.result as string;
-        // 生成缩略图
-        const img = new Image();
-        img.onload = () => {
-          const canvas = document.createElement('canvas');
-          const maxSize = 200;
-          const scale = Math.min(maxSize / img.width, maxSize / img.height);
-          canvas.width = img.width * scale;
-          canvas.height = img.height * scale;
-          canvas.getContext('2d')!.drawImage(img, 0, 0, canvas.width, canvas.height);
-          const thumb = canvas.toDataURL('image/jpeg', 0.7);
 
+    for (const file of Array.from(files)) {
+      try {
+        const photoId = Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
+
+        // Generate thumbnail
+        const dataUrl = await readAsDataURL(file);
+        const thumb = await generateThumbnail(dataUrl);
+
+        if (user) {
+          // Upload to Supabase Storage for cross-session persistence
+          const supabase = createClient();
+          const filePath = `${user.id}/${photoId}-${file.name}`;
+          const { error: uploadError } = await supabase.storage
+            .from('photos')
+            .upload(filePath, file, { upsert: true });
+
+          if (uploadError) throw uploadError;
+
+          const { data: urlData } = supabase.storage.from('photos').getPublicUrl(filePath);
+
+          // Upload thumbnail too
+          const thumbBlob = dataURLtoBlob(thumb);
+          const thumbPath = `${user.id}/${photoId}-thumb.jpg`;
+          await supabase.storage
+            .from('photos')
+            .upload(thumbPath, thumbBlob, { contentType: 'image/jpeg', upsert: true });
+          const { data: thumbUrlData } = supabase.storage.from('photos').getPublicUrl(thumbPath);
+
+          addPhoto({
+            title: file.name.replace(/\.[^.]+$/, ''),
+            url: urlData.publicUrl,
+            thumbnailUrl: thumbUrlData.publicUrl,
+            storagePath: filePath,
+            tags: [],
+            albumId: null,
+            date: new Date().toISOString().split('T')[0]!,
+          });
+        } else {
+          // Not logged in - use data URL (won't survive page reload)
           addPhoto({
             title: file.name.replace(/\.[^.]+$/, ''),
             url: dataUrl,
@@ -40,12 +68,12 @@ export default function PhotosPage() {
             albumId: null,
             date: new Date().toISOString().split('T')[0]!,
           });
-          setUploading(false);
-        };
-        img.src = dataUrl;
-      };
-      reader.readAsDataURL(file);
-    });
+        }
+      } catch (err) {
+        console.error('Photo upload failed:', err);
+      }
+    }
+    setUploading(false);
   };
 
   const handlePaste = (e: React.ClipboardEvent) => {
@@ -143,7 +171,15 @@ export default function PhotosPage() {
               <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, padding: '6px 8px', background: 'linear-gradient(transparent, rgba(0,0,0,0.5))' }}>
                 <span style={{ color: '#FFF', fontSize: 11 }}>{p.title}</span>
               </div>
-              <button onClick={(e) => { e.stopPropagation(); deletePhoto(p.id); }}
+              <button onClick={async (e) => {
+                e.stopPropagation();
+                // Also delete from Supabase Storage if cloud-synced
+                if (p.storagePath && user) {
+                  const supabase = createClient();
+                  await supabase.storage.from('photos').remove([p.storagePath]);
+                }
+                deletePhoto(p.id);
+              }}
                 style={{ position: 'absolute', top: 4, right: 4, width: 22, height: 22, borderRadius: '50%', border: 'none', backgroundColor: 'rgba(0,0,0,0.4)', color: '#FFF', fontSize: 12, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                 ✕
               </button>
@@ -184,4 +220,39 @@ function albumBtnStyle(active: boolean): React.CSSProperties {
     backgroundColor: active ? '#EDE9FE' : '#F5F5F4', color: active ? '#5B21B6' : '#78716C',
     fontWeight: active ? 600 : 400, cursor: 'pointer', transition: 'all 150ms ease',
   };
+}
+
+function readAsDataURL(file: File): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(reader.result as string);
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
+  });
+}
+
+function generateThumbnail(dataUrl: string): Promise<string> {
+  return new Promise((resolve) => {
+    const img = new Image();
+    img.onload = () => {
+      const canvas = document.createElement('canvas');
+      const maxSize = 200;
+      const scale = Math.min(maxSize / img.width, maxSize / img.height);
+      canvas.width = img.width * scale;
+      canvas.height = img.height * scale;
+      canvas.getContext('2d')!.drawImage(img, 0, 0, canvas.width, canvas.height);
+      resolve(canvas.toDataURL('image/jpeg', 0.7));
+    };
+    img.src = dataUrl;
+  });
+}
+
+function dataURLtoBlob(dataURL: string): Blob {
+  const parts = dataURL.split(',');
+  const mime = parts[0]!.match(/:(.*?);/)![1];
+  const bytes = atob(parts[1]!);
+  const ab = new ArrayBuffer(bytes.length);
+  const ia = new Uint8Array(ab);
+  for (let i = 0; i < bytes.length; i++) ia[i] = bytes.charCodeAt(i);
+  return new Blob([ab], { type: mime });
 }

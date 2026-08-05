@@ -6,8 +6,9 @@ import { persist } from 'zustand/middleware';
 export interface PhotoEntry {
   id: string;
   title: string;
-  url: string; // local data URL or Supabase public URL
+  url: string; // Supabase public URL (persisted) or data URL (fallback)
   thumbnailUrl: string;
+  storagePath?: string; // Supabase storage path for deletion
   tags: string[];
   albumId: string | null;
   date: string; // YYYY-MM-DD
