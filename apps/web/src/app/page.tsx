@@ -81,10 +81,35 @@ export default function HomePage() {
 
   if (loading && !forceShowLogin) {
     return (
-      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', minHeight: '100vh', color: '#A8A29E', fontSize: 14, gap: 16 }}>
+      <div
+        style={{
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          justifyContent: 'center',
+          minHeight: '100vh',
+          color: 'var(--color-text-muted)',
+          fontFamily: 'var(--font-body)',
+          fontSize: 14,
+          gap: 'var(--space-4)',
+          backgroundColor: 'var(--color-bg)',
+        }}
+      >
         <div>🌀 加载中...</div>
-        <button onClick={() => setForceShowLogin(true)}
-          style={{ padding: '6px 16px', fontSize: 12, color: '#7C3AED', backgroundColor: 'transparent', border: '1px solid #7C3AED', borderRadius: 6, cursor: 'pointer' }}>
+        <button
+          onClick={() => setForceShowLogin(true)}
+          style={{
+            padding: 'var(--space-2) var(--space-4)',
+            fontSize: 13,
+            fontFamily: 'var(--font-body)',
+            color: 'var(--color-primary)',
+            backgroundColor: 'transparent',
+            border: '1px solid var(--color-primary)',
+            borderRadius: 'var(--radius-full)',
+            cursor: 'pointer',
+            transition: 'var(--transition-fast)',
+          }}
+        >
           跳过 → 进入登录
         </button>
       </div>
@@ -94,76 +119,261 @@ export default function HomePage() {
   if (user) return null;
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', minHeight: '100vh', padding: 24, backgroundColor: '#FAFAF9' }}>
-      <div style={{ fontSize: 64, marginBottom: 8 }}>🌀</div>
-      <h1 style={{ fontSize: 28, fontWeight: 700, color: '#1C1917', margin: '0 0 4px' }}>心流OS</h1>
-      <p style={{ fontSize: 14, color: '#78716C', margin: '0 0 32px', textAlign: 'center' }}>开源个人生活中枢</p>
+    <div
+      style={{
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        justifyContent: 'center',
+        minHeight: '100vh',
+        padding: 'var(--space-6)',
+        backgroundColor: 'var(--color-bg)',
+      }}
+    >
+      {/* Magazine hero: centered serif display */}
+      <div
+        style={{
+          textAlign: 'center',
+          marginBottom: 'var(--space-10)',
+        }}
+      >
+        <div style={{ fontSize: 64, marginBottom: 'var(--space-4)', lineHeight: 1 }}>🌀</div>
+        <h1
+          className="display-large"
+          style={{
+            fontFamily: 'var(--font-display)',
+            color: 'var(--color-text)',
+            margin: '0 0 var(--space-2)',
+            lineHeight: 1.1,
+          }}
+        >
+          心流OS
+        </h1>
+        <p
+          className="body-large"
+          style={{
+            fontFamily: 'var(--font-body)',
+            color: 'var(--color-text-secondary)',
+            margin: 0,
+          }}
+        >
+          开源个人生活中枢
+        </p>
+      </div>
 
-      <div style={{ width: '100%', maxWidth: 360, backgroundColor: '#FFF', borderRadius: 16, padding: 24, border: '1.5px solid #E7E5E4' }}>
-        {/* 模式切换 */}
-        <div style={{ display: 'flex', gap: 0, marginBottom: 20, backgroundColor: '#F5F5F4', borderRadius: 10, padding: 3 }}>
-          <button onClick={() => { setMode('password'); setError(''); }}
-            style={tabStyle(mode === 'password')}>🔐 密码登录</button>
-          <button onClick={() => { setMode('magic'); setError(''); }}
-            style={tabStyle(mode === 'magic')}>✉️ 免密登录</button>
+      {/* Login card: minimal, no heavy border */}
+      <div
+        style={{
+          width: '100%',
+          maxWidth: 400,
+          backgroundColor: 'var(--color-surface)',
+          borderRadius: 'var(--radius-lg)',
+          padding: 'var(--space-8) var(--space-6)',
+          border: '1px solid var(--color-divider)',
+        }}
+      >
+        {/* Mode toggle */}
+        <div
+          style={{
+            display: 'flex',
+            gap: 0,
+            marginBottom: 'var(--space-6)',
+            backgroundColor: 'var(--color-surface-hover)',
+            borderRadius: 'var(--radius-full)',
+            padding: 3,
+          }}
+        >
+          <button
+            onClick={() => {
+              setMode('password');
+              setError('');
+            }}
+            style={tabStyle(mode === 'password')}
+          >
+            🔐 密码登录
+          </button>
+          <button
+            onClick={() => {
+              setMode('magic');
+              setError('');
+            }}
+            style={tabStyle(mode === 'magic')}
+          >
+            ✉️ 免密登录
+          </button>
         </div>
 
-        {/* ===== 密码模式 ===== */}
+        {/* ===== Password mode ===== */}
         {mode === 'password' && (
           <>
-            <input type="email" value={email} onChange={(e) => setEmail(e.target.value)}
-              placeholder="邮箱地址" autoComplete="email"
-              style={inputStyle} />
-            <input type="password" value={password} onChange={(e) => setPassword(e.target.value)}
-              placeholder="密码" autoComplete="current-password"
-              style={{ ...inputStyle, marginBottom: 8 }}
-              onKeyDown={(e) => { if (e.key === 'Enter') handlePasswordLogin(); }} />
+            <input
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              placeholder="邮箱地址"
+              autoComplete="email"
+              style={inputStyle}
+            />
+            <input
+              type="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              placeholder="密码"
+              autoComplete="current-password"
+              style={{ ...inputStyle, marginBottom: 'var(--space-2)' }}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') handlePasswordLogin();
+              }}
+            />
 
-            {error && <p style={{ fontSize: 12, color: '#EF4444', margin: '0 0 8px' }}>{error}</p>}
+            {error && (
+              <p
+                className="body-small"
+                style={{
+                  fontFamily: 'var(--font-body)',
+                  color: 'var(--color-error)',
+                  margin: '0 0 var(--space-2)',
+                }}
+              >
+                {error}
+              </p>
+            )}
 
-            <button onClick={handlePasswordLogin} disabled={!email || !password || submitting}
-              style={primaryBtnStyle(!email || !password || submitting)}>
+            <button
+              onClick={handlePasswordLogin}
+              disabled={!email || !password || submitting}
+              style={primaryBtnStyle(!email || !password || submitting)}
+            >
               {submitting ? '登录中...' : '登录'}
             </button>
 
-            <div style={{ textAlign: 'center', marginTop: 12 }}>
-              <span style={{ fontSize: 12, color: '#A8A29E' }}>还没有账号？</span>
-              <button onClick={handlePasswordSignup} disabled={!email || password.length < 6 || submitting}
-                style={{ fontSize: 12, color: '#7C3AED', border: 'none', backgroundColor: 'transparent', cursor: 'pointer', fontWeight: 600, marginLeft: 4 }}>
+            <div style={{ textAlign: 'center', marginTop: 'var(--space-3)' }}>
+              <span
+                className="body-small"
+                style={{
+                  fontFamily: 'var(--font-body)',
+                  color: 'var(--color-text-muted)',
+                }}
+              >
+                还没有账号？
+              </span>
+              <button
+                onClick={handlePasswordSignup}
+                disabled={!email || password.length < 6 || submitting}
+                style={{
+                  fontSize: 13,
+                  fontFamily: 'var(--font-body)',
+                  color: 'var(--color-primary)',
+                  border: 'none',
+                  backgroundColor: 'transparent',
+                  cursor: 'pointer',
+                  fontWeight: 600,
+                  marginLeft: 'var(--space-1)',
+                }}
+              >
                 注册
               </button>
             </div>
 
-            <p style={{ fontSize: 10, color: '#A8A29E', marginTop: 10, textAlign: 'center' }}>
+            <p
+              className="caption"
+              style={{
+                fontFamily: 'var(--font-body)',
+                color: 'var(--color-text-muted)',
+                marginTop: 'var(--space-3)',
+                textAlign: 'center',
+              }}
+            >
               登录后会话自动保持，下次打开无需重新登录
             </p>
           </>
         )}
 
-        {/* ===== 免密模式 ===== */}
+        {/* ===== Magic link mode ===== */}
         {mode === 'magic' && (
           <>
             {!sent ? (
               <>
-                <input type="email" value={email} onChange={(e) => setEmail(e.target.value)}
-                  placeholder="输入邮箱地址" autoComplete="email"
+                <input
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  placeholder="输入邮箱地址"
+                  autoComplete="email"
                   style={inputStyle}
-                  onKeyDown={(e) => { if (e.key === 'Enter' && email) { signIn(email); setSent(true); } }} />
-                <button onClick={() => { if (email) { signIn(email); setSent(true); } }} disabled={!email}
-                  style={primaryBtnStyle(!email)}>
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' && email) {
+                      signIn(email);
+                      setSent(true);
+                    }
+                  }}
+                />
+                <button
+                  onClick={() => {
+                    if (email) {
+                      signIn(email);
+                      setSent(true);
+                    }
+                  }}
+                  disabled={!email}
+                  style={primaryBtnStyle(!email)}
+                >
                   发送魔法链接
                 </button>
-                <p style={{ fontSize: 11, color: '#A8A29E', marginTop: 10, textAlign: 'center' }}>
+                <p
+                  className="caption"
+                  style={{
+                    fontFamily: 'var(--font-body)',
+                    color: 'var(--color-text-muted)',
+                    marginTop: 'var(--space-3)',
+                    textAlign: 'center',
+                  }}
+                >
                   无需密码，点击邮件中的链接即可登录
                 </p>
               </>
             ) : (
               <div style={{ textAlign: 'center' }}>
-                <p style={{ fontSize: 40, margin: '0 0 12px' }}>📧</p>
-                <p style={{ fontSize: 15, fontWeight: 600, color: '#1C1917', margin: '0 0 4px' }}>邮件已发送</p>
-                <p style={{ fontSize: 13, color: '#78716C', margin: '0 0 16px' }}>请查看 {email}</p>
-                <button onClick={() => setSent(false)}
-                  style={{ padding: '8px 20px', fontSize: 13, color: '#7C3AED', backgroundColor: 'transparent', border: '1.5px solid #7C3AED', borderRadius: 8, cursor: 'pointer' }}>换邮箱</button>
+                <p style={{ fontSize: 44, margin: '0 0 var(--space-4)', lineHeight: 1 }}>
+                  📧
+                </p>
+                <p
+                  className="heading-2"
+                  style={{
+                    fontFamily: 'var(--font-display)',
+                    color: 'var(--color-text)',
+                    margin: '0 0 var(--space-1)',
+                  }}
+                >
+                  邮件已发送
+                </p>
+                <p
+                  className="body-text"
+                  style={{
+                    fontFamily: 'var(--font-body)',
+                    color: 'var(--color-text-secondary)',
+                    margin: '0 0 var(--space-6)',
+                  }}
+                >
+                  请查看 {email}
+                </p>
+                <button
+                  onClick={() => setSent(false)}
+                  style={{
+                    padding: 'var(--space-2) var(--space-5)',
+                    fontFamily: 'var(--font-body)',
+                    fontSize: 14,
+                    fontWeight: 600,
+                    color: 'var(--color-primary)',
+                    backgroundColor: 'transparent',
+                    border: '1px solid var(--color-primary)',
+                    borderRadius: 'var(--radius-full)',
+                    cursor: 'pointer',
+                    transition: 'var(--transition-fast)',
+                  }}
+                >
+                  换邮箱
+                </button>
               </div>
             )}
           </>
@@ -174,19 +384,46 @@ export default function HomePage() {
 }
 
 const inputStyle: React.CSSProperties = {
-  width: '100%', padding: '12px 14px', fontSize: 15, border: '1.5px solid #E7E5E4',
-  borderRadius: 10, outline: 'none', marginBottom: 12, boxSizing: 'border-box',
+  width: '100%',
+  padding: 'var(--space-3) var(--space-4)',
+  fontFamily: 'var(--font-body)',
+  fontSize: 15,
+  border: '1px solid var(--color-border)',
+  borderRadius: 'var(--radius-md)',
+  outline: 'none',
+  marginBottom: 'var(--space-3)',
+  boxSizing: 'border-box',
+  backgroundColor: 'transparent',
+  color: 'var(--color-text)',
+  transition: 'var(--transition-fast)',
 };
 
 const primaryBtnStyle = (disabled: boolean): React.CSSProperties => ({
-  width: '100%', padding: '12px', fontSize: 15, fontWeight: 600,
-  color: '#FFF', backgroundColor: disabled ? '#D6D3D1' : '#7C3AED',
-  border: 'none', borderRadius: 10, cursor: disabled ? 'not-allowed' : 'pointer',
+  width: '100%',
+  padding: 'var(--space-3) var(--space-4)',
+  fontFamily: 'var(--font-body)',
+  fontSize: 15,
+  fontWeight: 600,
+  color: 'var(--color-bg)',
+  backgroundColor: disabled
+    ? 'var(--color-text-muted)'
+    : 'var(--color-primary)',
+  border: 'none',
+  borderRadius: 'var(--radius-full)',
+  cursor: disabled ? 'not-allowed' : 'pointer',
+  transition: 'var(--transition-fast)',
 });
 
 const tabStyle = (active: boolean): React.CSSProperties => ({
-  flex: 1, padding: '8px 12px', fontSize: 13, fontWeight: active ? 600 : 400,
-  borderRadius: 8, border: 'none', backgroundColor: active ? '#FFF' : 'transparent',
-  color: active ? '#1C1917' : '#78716C', cursor: 'pointer',
-  transition: 'all 150ms ease', boxShadow: active ? '0 1px 3px rgba(0,0,0,0.08)' : 'none',
+  flex: 1,
+  padding: 'var(--space-2) var(--space-3)',
+  fontFamily: 'var(--font-body)',
+  fontSize: 13,
+  fontWeight: active ? 600 : 400,
+  borderRadius: 'var(--radius-full)',
+  border: 'none',
+  backgroundColor: active ? 'var(--color-surface)' : 'transparent',
+  color: active ? 'var(--color-text)' : 'var(--color-text-muted)',
+  cursor: 'pointer',
+  transition: 'var(--transition-fast)',
 });

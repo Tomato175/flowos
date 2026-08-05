@@ -93,118 +93,394 @@ export default function PhotosPage() {
   const dailyPhoto = getDailyPhoto();
 
   return (
-    <div style={{ maxWidth: 780, margin: '0 auto', padding: '24px 20px', minHeight: '100vh' }}
-      onPaste={handlePaste} tabIndex={0}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 18 }}>
+    <div
+      style={{
+        maxWidth: 880,
+        margin: '0 auto',
+        padding: 'var(--space-12) var(--space-6) var(--space-16)',
+        minHeight: '100vh',
+      }}
+      onPaste={handlePaste}
+      tabIndex={0}
+    >
+      {/* Header */}
+      <div
+        style={{
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'flex-end',
+          marginBottom: 'var(--space-8)',
+          flexWrap: 'wrap',
+          gap: 'var(--space-4)',
+        }}
+      >
         <div>
-          <h1 style={{ fontSize: 24, fontWeight: 700, margin: '0 0 2px' }}>照片</h1>
-          <p style={{ fontSize: 12, color: '#A8A29E', margin: 0 }}>
+          <h1
+            className="display-medium"
+            style={{
+              fontFamily: 'var(--font-display)',
+              color: 'var(--color-text)',
+              margin: 0,
+              marginBottom: 'var(--space-1)',
+            }}
+          >
+            照片
+          </h1>
+          <p
+            className="body-small"
+            style={{
+              color: 'var(--color-text-muted)',
+              margin: 0,
+            }}
+          >
             {photos.length} 张 · 支持粘贴上传 (Ctrl+V)
           </p>
         </div>
-        <div style={{ display: 'flex', gap: 8 }}>
-          <button onClick={() => fileInputRef.current?.click()}
-            style={{ padding: '8px 16px', fontSize: 13, fontWeight: 600, color: '#FFF', backgroundColor: '#7C3AED', border: 'none', borderRadius: 10, cursor: 'pointer' }}>
-            {uploading ? '上传中...' : '+ 上传照片'}
-          </button>
-          <input ref={fileInputRef} type="file" accept="image/*" multiple
-            onChange={(e) => handleUpload(e.target.files)}
-            style={{ display: 'none' }} />
-        </div>
+        <button
+          onClick={() => fileInputRef.current?.click()}
+          style={{
+            padding: 'var(--space-2) var(--space-5)',
+            fontSize: 14,
+            fontWeight: 600,
+            fontFamily: 'var(--font-body)',
+            color: 'var(--color-bg)',
+            backgroundColor: 'var(--color-primary)',
+            border: 'none',
+            borderRadius: 'var(--radius-full)',
+            cursor: 'pointer',
+            transition: 'var(--transition-fast)',
+          }}
+        >
+          {uploading ? '上传中...' : '+ 上传照片'}
+        </button>
+        <input
+          ref={fileInputRef}
+          type="file"
+          accept="image/*"
+          multiple
+          onChange={(e) => handleUpload(e.target.files)}
+          style={{ display: 'none' }}
+        />
       </div>
 
-      {/* 每日主题照 */}
+      {/* Daily Featured Photo */}
       {dailyPhoto && (
-        <div style={{ backgroundColor: '#FFF', borderRadius: 16, padding: 16, border: '1.5px solid #E7E5E4', marginBottom: 16 }}>
-          <p style={{ fontSize: 13, fontWeight: 600, color: '#78716C', margin: '0 0 8px' }}>📸 今日主题</p>
-          <div style={{ position: 'relative', borderRadius: 12, overflow: 'hidden', maxHeight: 300 }}>
-            <img src={dailyPhoto.url} alt={dailyPhoto.title}
-              style={{ width: '100%', objectFit: 'cover', cursor: 'pointer' }}
-              onClick={() => setViewing(dailyPhoto)} />
-            <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, padding: '12px 16px', background: 'linear-gradient(transparent, rgba(0,0,0,0.6))' }}>
-              <span style={{ color: '#FFF', fontSize: 14, fontWeight: 600 }}>{dailyPhoto.title}</span>
+        <div style={{ marginBottom: 'var(--space-8)' }}>
+          <p
+            className="label-text"
+            style={{
+              fontFamily: 'var(--font-body)',
+              color: 'var(--color-text-secondary)',
+              margin: '0 0 var(--space-2)',
+              textTransform: 'uppercase',
+              letterSpacing: '0.05em',
+            }}
+          >
+            📸 今日主题
+          </p>
+          <div
+            style={{
+              position: 'relative',
+              borderRadius: 'var(--radius-lg)',
+              overflow: 'hidden',
+              maxHeight: 360,
+              cursor: 'pointer',
+            }}
+            onClick={() => setViewing(dailyPhoto)}
+          >
+            <img
+              src={dailyPhoto.url}
+              alt={dailyPhoto.title}
+              style={{
+                width: '100%',
+                height: '100%',
+                objectFit: 'cover',
+                transition: 'var(--transition-base)',
+              }}
+              onMouseEnter={(e) => {
+                (e.currentTarget as HTMLElement).style.transform = 'scale(1.03)';
+              }}
+              onMouseLeave={(e) => {
+                (e.currentTarget as HTMLElement).style.transform = 'scale(1)';
+              }}
+            />
+            <div
+              style={{
+                position: 'absolute',
+                bottom: 0,
+                left: 0,
+                right: 0,
+                padding: 'var(--space-6) var(--space-4) var(--space-4)',
+                background:
+                  'linear-gradient(transparent, rgba(0,0,0,0.55))',
+              }}
+            >
+              <span
+                className="heading-3"
+                style={{
+                  fontFamily: 'var(--font-display)',
+                  color: '#fff',
+                }}
+              >
+                {dailyPhoto.title}
+              </span>
             </div>
           </div>
         </div>
       )}
 
-      {/* 相册过滤 */}
-      <div style={{ display: 'flex', gap: 6, overflowX: 'auto', marginBottom: 14, scrollbarWidth: 'none' }}>
-        <button onClick={() => setSelectedAlbum('all')}
-          style={albumBtnStyle(selectedAlbum === 'all')}>📷 全部</button>
+      {/* Album filter pills */}
+      <div
+        style={{
+          display: 'flex',
+          gap: 'var(--space-2)',
+          overflowX: 'auto',
+          marginBottom: 'var(--space-6)',
+          scrollbarWidth: 'none',
+          paddingBottom: 'var(--space-1)',
+        }}
+      >
+        <button
+          onClick={() => setSelectedAlbum('all')}
+          style={albumBtnStyle(selectedAlbum === 'all')}
+        >
+          📷 全部
+        </button>
         {albums.map((a) => (
-          <button key={a.id} onClick={() => setSelectedAlbum(a.id)}
-            style={albumBtnStyle(selectedAlbum === a.id)}>{a.icon} {a.name}</button>
+          <button
+            key={a.id}
+            onClick={() => setSelectedAlbum(a.id)}
+            style={albumBtnStyle(selectedAlbum === a.id)}
+          >
+            {a.icon} {a.name}
+          </button>
         ))}
       </div>
 
-      {/* 照片墙 */}
+      {/* Photo Gallery Grid */}
       {filtered.length === 0 ? (
-        <div style={{ textAlign: 'center', padding: '60px 20px', color: '#A8A29E' }}>
-          <p style={{ fontSize: 48, margin: '0 0 12px' }}>📷</p>
-          <p style={{ fontSize: 15, margin: 0 }}>还没有照片</p>
-          <p style={{ fontSize: 13, margin: '4px 0 16px' }}>点击「+ 上传照片」或直接 Ctrl+V 粘贴图片</p>
-          <div
+        <div
+          style={{
+            textAlign: 'center',
+            padding: 'var(--space-20) var(--space-6)',
+            color: 'var(--color-text-muted)',
+          }}
+        >
+          <p style={{ fontSize: 56, margin: '0 0 var(--space-3)', lineHeight: 1 }}>📷</p>
+          <p
+            className="heading-3"
+            style={{
+              fontFamily: 'var(--font-display)',
+              color: 'var(--color-text)',
+              margin: '0 0 var(--space-1)',
+            }}
+          >
+            还没有照片
+          </p>
+          <p
+            className="body-small"
+            style={{
+              color: 'var(--color-text-muted)',
+              margin: '0 0 var(--space-6)',
+            }}
+          >
+            点击「+ 上传照片」或直接 Ctrl+V 粘贴图片
+          </p>
+          <button
             onClick={() => fileInputRef.current?.click()}
             style={{
-              display: 'inline-block', padding: '12px 24px', fontSize: 14, fontWeight: 600,
-              color: '#FFF', backgroundColor: '#7C3AED', borderRadius: 10, cursor: 'pointer',
-              border: '2px dashed #A78BFA',
-            }}>
+              display: 'inline-block',
+              padding: 'var(--space-3) var(--space-6)',
+              fontSize: 14,
+              fontWeight: 600,
+              fontFamily: 'var(--font-body)',
+              color: 'var(--color-bg)',
+              backgroundColor: 'var(--color-primary)',
+              borderRadius: 'var(--radius-full)',
+              cursor: 'pointer',
+              border: 'none',
+            }}
+          >
             📤 拖拽或粘贴到此
-          </div>
+          </button>
         </div>
       ) : (
-        <div style={{
-          display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fill, minmax(160px, 1fr))',
-          gap: 8,
-        }}>
+        <div
+          style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(auto-fill, minmax(180px, 1fr))',
+            gap: 'var(--space-3)',
+          }}
+        >
           {filtered.map((p) => (
-            <div key={p.id} style={{ position: 'relative', borderRadius: 10, overflow: 'hidden', aspectRatio: '1', backgroundColor: '#F5F5F4', cursor: 'pointer' }}
-              onClick={() => setViewing(p)}>
-              <img src={p.thumbnailUrl} alt={p.title}
-                style={{ width: '100%', height: '100%', objectFit: 'cover', transition: 'transform 150ms ease' }}
-                onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.transform = 'scale(1.05)'; }}
-                onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.transform = 'scale(1)'; }}
-              />
-              <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, padding: '6px 8px', background: 'linear-gradient(transparent, rgba(0,0,0,0.5))' }}>
-                <span style={{ color: '#FFF', fontSize: 11 }}>{p.title}</span>
-              </div>
-              <button onClick={async (e) => {
-                e.stopPropagation();
-                // Also delete from Supabase Storage if cloud-synced
-                if (p.storagePath && user) {
-                  const supabase = createClient();
-                  await supabase.storage.from('photos').remove([p.storagePath]);
-                }
-                deletePhoto(p.id);
+            <div
+              key={p.id}
+              style={{
+                position: 'relative',
+                borderRadius: 'var(--radius-md)',
+                overflow: 'hidden',
+                aspectRatio: '1',
+                backgroundColor: 'var(--color-surface)',
+                cursor: 'pointer',
               }}
-                style={{ position: 'absolute', top: 4, right: 4, width: 22, height: 22, borderRadius: '50%', border: 'none', backgroundColor: 'rgba(0,0,0,0.4)', color: '#FFF', fontSize: 12, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              onClick={() => setViewing(p)}
+            >
+              <img
+                src={p.thumbnailUrl}
+                alt={p.title}
+                style={{
+                  width: '100%',
+                  height: '100%',
+                  objectFit: 'cover',
+                  transition: 'transform var(--transition-base)',
+                }}
+                onMouseEnter={(e) => {
+                  (e.currentTarget as HTMLElement).style.transform =
+                    'scale(1.06)';
+                }}
+                onMouseLeave={(e) => {
+                  (e.currentTarget as HTMLElement).style.transform =
+                    'scale(1)';
+                }}
+              />
+              <div
+                style={{
+                  position: 'absolute',
+                  bottom: 0,
+                  left: 0,
+                  right: 0,
+                  padding: 'var(--space-2) var(--space-3)',
+                  background:
+                    'linear-gradient(transparent, rgba(0,0,0,0.45))',
+                }}
+              >
+                <span
+                  className="caption"
+                  style={{ fontFamily: 'var(--font-body)', color: '#fff' }}
+                >
+                  {p.title}
+                </span>
+              </div>
+              <button
+                onClick={async (e) => {
+                  e.stopPropagation();
+                  if (p.storagePath && user) {
+                    const supabase = createClient();
+                    await supabase.storage
+                      .from('photos')
+                      .remove([p.storagePath]);
+                  }
+                  deletePhoto(p.id);
+                }}
+                style={{
+                  position: 'absolute',
+                  top: 'var(--space-2)',
+                  right: 'var(--space-2)',
+                  width: 24,
+                  height: 24,
+                  borderRadius: 'var(--radius-full)',
+                  border: 'none',
+                  backgroundColor: 'rgba(0,0,0,0.35)',
+                  color: '#fff',
+                  fontSize: 12,
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  backdropFilter: 'blur(4px)',
+                }}
+              >
                 ✕
               </button>
               {dailyTheme === p.id && (
-                <span style={{ position: 'absolute', top: 4, left: 4, fontSize: 16 }}>⭐</span>
+                <span
+                  style={{
+                    position: 'absolute',
+                    top: 'var(--space-2)',
+                    left: 'var(--space-2)',
+                    fontSize: 18,
+                  }}
+                >
+                  ⭐
+                </span>
               )}
             </div>
           ))}
         </div>
       )}
 
-      {/* 照片查看器 */}
+      {/* Photo Viewer Overlay */}
       {viewing && (
-        <div onClick={() => setViewing(null)}
-          style={{ position: 'fixed', inset: 0, backgroundColor: 'rgba(0,0,0,0.9)', zIndex: 100, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
-          <img src={viewing.url} alt={viewing.title}
-            style={{ maxWidth: '90vw', maxHeight: '80vh', borderRadius: 12 }} />
-          <div style={{ marginTop: 16, color: '#FFF', fontSize: 14 }}>{viewing.title} · {viewing.date}</div>
-          <div style={{ marginTop: 12, display: 'flex', gap: 8 }}>
-            <button onClick={(e) => { e.stopPropagation(); setDailyTheme(viewing.id); }}
-              style={{ padding: '6px 14px', fontSize: 12, color: '#FFF', backgroundColor: '#F59E0B', border: 'none', borderRadius: 8, cursor: 'pointer' }}>
+        <div
+          onClick={() => setViewing(null)}
+          style={{
+            position: 'fixed',
+            inset: 0,
+            backgroundColor: 'rgba(0,0,0,0.92)',
+            zIndex: 100,
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            justifyContent: 'center',
+          }}
+        >
+          <img
+            src={viewing.url}
+            alt={viewing.title}
+            style={{
+              maxWidth: '90vw',
+              maxHeight: '80vh',
+              borderRadius: 'var(--radius-lg)',
+            }}
+          />
+          <div
+            className="body-text"
+            style={{
+              fontFamily: 'var(--font-body)',
+              marginTop: 'var(--space-4)',
+              color: '#fff',
+            }}
+          >
+            {viewing.title} · {viewing.date}
+          </div>
+          <div
+            style={{
+              marginTop: 'var(--space-3)',
+              display: 'flex',
+              gap: 'var(--space-2)',
+            }}
+          >
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                setDailyTheme(viewing.id);
+              }}
+              style={{
+                padding: 'var(--space-2) var(--space-4)',
+                fontSize: 13,
+                fontFamily: 'var(--font-body)',
+                color: 'var(--color-bg)',
+                backgroundColor: 'var(--color-primary)',
+                border: 'none',
+                borderRadius: 'var(--radius-full)',
+                cursor: 'pointer',
+              }}
+            >
               ⭐ 设为今日主题
             </button>
-            <button onClick={() => setViewing(null)}
-              style={{ padding: '6px 14px', fontSize: 12, color: '#FFF', backgroundColor: 'rgba(255,255,255,0.2)', border: 'none', borderRadius: 8, cursor: 'pointer' }}>
+            <button
+              onClick={() => setViewing(null)}
+              style={{
+                padding: 'var(--space-2) var(--space-4)',
+                fontSize: 13,
+                fontFamily: 'var(--font-body)',
+                color: '#fff',
+                backgroundColor: 'rgba(255,255,255,0.15)',
+                border: 'none',
+                borderRadius: 'var(--radius-full)',
+                cursor: 'pointer',
+              }}
+            >
               关闭
             </button>
           </div>
@@ -216,9 +492,19 @@ export default function PhotosPage() {
 
 function albumBtnStyle(active: boolean): React.CSSProperties {
   return {
-    padding: '5px 14px', fontSize: 12, borderRadius: 16, border: 'none', whiteSpace: 'nowrap',
-    backgroundColor: active ? '#EDE9FE' : '#F5F5F4', color: active ? '#5B21B6' : '#78716C',
-    fontWeight: active ? 600 : 400, cursor: 'pointer', transition: 'all 150ms ease',
+    padding: 'var(--space-1) var(--space-3)',
+    fontSize: 13,
+    fontFamily: 'var(--font-body)',
+    borderRadius: 'var(--radius-full)',
+    border: 'none',
+    whiteSpace: 'nowrap',
+    backgroundColor: active
+      ? 'var(--color-primary-subtle)'
+      : 'var(--color-surface-hover)',
+    color: active ? 'var(--color-primary)' : 'var(--color-text-secondary)',
+    fontWeight: active ? 600 : 400,
+    cursor: 'pointer',
+    transition: 'var(--transition-fast)',
   };
 }
 

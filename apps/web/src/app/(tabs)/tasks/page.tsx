@@ -11,7 +11,6 @@ const STATUS_FILTERS: { key: TaskStatus | 'all'; label: string; emoji: string }[
   { key: 'done', label: '已完成', emoji: '✅' },
 ];
 
-const P_COLORS: Record<Priority, string> = { 0: '#EF4444', 1: '#F59E0B', 2: '#3B82F6', 3: '#A8A29E' };
 const P_LABELS: Record<Priority, string> = { 0: 'P0', 1: 'P1', 2: 'P2', 3: 'P3' };
 
 export default function TasksPage() {
@@ -62,137 +61,212 @@ export default function TasksPage() {
   const saveEdit = (id: string) => { if (editTitle.trim()) updateTask(id, { title: editTitle.trim() }); setEditingId(null); };
 
   return (
-    <div style={{ maxWidth: 720, margin: '0 auto', padding: '24px 20px' }}>
+    <div className="animate-enter" style={pageStyle}>
       {/* 头部 */}
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 18 }}>
+      <div style={headerStyle}>
         <div>
-          <h1 style={{ fontSize: 24, fontWeight: 700, margin: '0 0 2px', color: '#1C1917' }}>任务</h1>
-          <p style={{ fontSize: 12, color: '#A8A29E', margin: 0 }}>Ctrl+N 快速添加</p>
+          <h1 className="display-medium" style={pageTitleStyle}>任务</h1>
+          <p className="caption" style={subtitleStyle}>Ctrl+N 快速添加</p>
         </div>
-        <button onClick={() => { setShowForm(!showForm); setTimeout(() => inputRef.current?.focus(), 100); }}
-          style={fabStyle(showForm)}>
-          {showForm ? '✕' : '+'}
+        <button
+          onClick={() => { setShowForm(!showForm); setTimeout(() => inputRef.current?.focus(), 100); }}
+          style={fabStyle(showForm)}
+          aria-label={showForm ? '关闭' : '新建任务'}
+        >
+          {showForm ? '×' : '+'}
         </button>
       </div>
 
       {/* 新建任务表单 */}
       {showForm && (
-        <div style={formCardStyle}>
-          <input ref={inputRef} value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })}
-            placeholder="任务标题 *" autoFocus
-            style={{ fontSize: 16, fontWeight: 600, border: 'none', outline: 'none', padding: '8px 0', color: '#1C1917' }}
+        <div className="animate-enter" style={formSectionStyle}>
+          <input
+            ref={inputRef}
+            value={form.title}
+            onChange={(e) => setForm({ ...form, title: e.target.value })}
+            placeholder="任务标题"
+            autoFocus
+            className="body-large"
+            style={inputStyle}
             onKeyDown={(e) => { if (e.key === 'Enter') submitTask(); if (e.key === 'Escape') setShowForm(false); }}
           />
-          <textarea value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })}
-            placeholder="描述（可选）" rows={2}
-            style={{ fontSize: 14, border: 'none', outline: 'none', resize: 'none', padding: '4px 0', color: '#78716C', fontFamily: 'inherit' }}
+          <textarea
+            value={form.description}
+            onChange={(e) => setForm({ ...form, description: e.target.value })}
+            placeholder="描述（可选）"
+            rows={2}
+            className="body-text"
+            style={{ ...inputStyle, resize: 'none', minHeight: 40 }}
           />
-          <div style={{ display: 'flex', gap: 8, alignItems: 'center', flexWrap: 'wrap' }}>
+          <div style={formRowStyle}>
             {([0, 1, 2, 3] as Priority[]).map((p) => (
-              <button key={p} onClick={() => setForm({ ...form, priority: p })}
-                style={priorityBtnStyle(form.priority === p, P_COLORS[p])}>{P_LABELS[p]}</button>
+              <button
+                key={p}
+                onClick={() => setForm({ ...form, priority: p })}
+                style={priorityBtnStyle(form.priority === p)}
+                className="label-text"
+              >
+                {P_LABELS[p]}
+              </button>
             ))}
             <span style={{ flex: 1 }} />
-            <input type="date" value={form.dueDate} onChange={(e) => setForm({ ...form, dueDate: e.target.value })}
-              style={miniInputStyle} />
-            <select value={form.projectId} onChange={(e) => setForm({ ...form, projectId: e.target.value })}
-              style={miniInputStyle}>
+            <input
+              type="date"
+              value={form.dueDate}
+              onChange={(e) => setForm({ ...form, dueDate: e.target.value })}
+              className="body-small"
+              style={miniInputStyle}
+            />
+            <select
+              value={form.projectId}
+              onChange={(e) => setForm({ ...form, projectId: e.target.value })}
+              className="body-small"
+              style={miniInputStyle}
+            >
               <option value="">无项目</option>
               {projects.map((p) => <option key={p.id} value={p.id}>{p.icon} {p.name}</option>)}
             </select>
-            <button onClick={submitTask} style={submitBtnStyle}>添加</button>
+            <button onClick={submitTask} className="label-text" style={submitBtnStyle}>
+              添加
+            </button>
           </div>
         </div>
       )}
 
       {/* 过滤器 */}
-      <div style={{ display: 'flex', gap: 6, overflowX: 'auto', paddingBottom: 8, marginBottom: 14, scrollbarWidth: 'none' }}>
+      <div style={filterBarStyle}>
         {STATUS_FILTERS.map((f) => (
-          <button key={f.key} onClick={() => setFilter(f.key)}
-            style={filterBtnStyle(filter === f.key)}>
-            {f.emoji} {f.label} <CountBadge count={counts[f.key] ?? 0} active={filter === f.key} />
+          <button
+            key={f.key}
+            onClick={() => setFilter(f.key)}
+            className="body-small"
+            style={filterBtnStyle(filter === f.key)}
+          >
+            {f.emoji} {f.label}
+            <CountBadge count={counts[f.key] ?? 0} active={filter === f.key} />
           </button>
         ))}
       </div>
 
+      {/* 分割线 */}
+      <div style={dividerStyle} />
+
       {/* 任务列表 */}
       {filtered.length === 0 ? (
-        <div style={{ textAlign: 'center', padding: '60px 20px', color: '#A8A29E' }}>
-          <p style={{ fontSize: 48, margin: '0 0 12px' }}>📭</p>
-          <p style={{ fontSize: 16, fontWeight: 600, color: '#78716C', margin: '0 0 4px' }}>
+        <div style={emptyStyle}>
+          <p className="display-large" style={emptyEmojiStyle}>
+            {filter === 'done' ? '🎉' : '📭'}
+          </p>
+          <p className="heading-3" style={emptyTitleStyle}>
             {filter === 'all' ? '还没有任务' : filter === 'done' ? '还没有完成的任务' : '这里空空如也'}
           </p>
-          <p style={{ fontSize: 13, margin: '0 0 16px' }}>
+          <p className="body-text" style={emptyDescStyle}>
             {filter === 'all' ? '点击右上角 + 或按 Ctrl+N 添加第一个任务' : '继续加油！'}
           </p>
           {filter === 'all' && (
-            <button onClick={() => { setShowForm(true); setTimeout(() => inputRef.current?.focus(), 100); }}
-              style={{ padding: '8px 20px', fontSize: 13, fontWeight: 600, color: '#FFF', backgroundColor: '#7C3AED', border: 'none', borderRadius: 10, cursor: 'pointer' }}>
-              创建任务
+            <button
+              onClick={() => { setShowForm(true); setTimeout(() => inputRef.current?.focus(), 100); }}
+              style={emptyBtnStyle}
+            >
+              创建第一个任务
             </button>
           )}
         </div>
       ) : (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-          {filtered.map((task) => {
+        <div style={listStyle}>
+          {filtered.map((task, index) => {
             const project = task.projectId ? projects.find((p) => p.id === task.projectId) : null;
             const isDone = task.status === 'done';
             const isEditing = editingId === task.id;
 
             return (
-              <div key={task.id}
-                style={{ ...taskItemStyle, opacity: isDone ? 0.55 : 1 }}
+              <div
+                key={task.id}
+                className="stagger-item"
+                style={{
+                  ...taskItemStyle,
+                  opacity: isDone ? 0.5 : 1,
+                  animationDelay: `${index * 0.03}s`,
+                }}
                 onDoubleClick={() => !isDone && startEdit(task.id, task.title)}
               >
                 {/* 完成勾选 */}
-                <button onClick={() => moveTask(task.id, isDone ? 'todo' : 'done')}
-                  style={checkStyle(isDone)} title={isDone ? '取消完成' : '标记完成'}>
+                <button
+                  onClick={() => moveTask(task.id, isDone ? 'todo' : 'done')}
+                  style={checkStyle(isDone)}
+                  title={isDone ? '取消完成' : '标记完成'}
+                >
                   {isDone ? '✓' : ''}
                 </button>
 
                 {/* 内容 */}
                 <div style={{ flex: 1, minWidth: 0 }}>
                   {isEditing ? (
-                    <input ref={editRef} value={editTitle}
+                    <input
+                      ref={editRef}
+                      value={editTitle}
                       onChange={(e) => setEditTitle(e.target.value)}
                       onBlur={() => saveEdit(task.id)}
                       onKeyDown={(e) => { if (e.key === 'Enter') saveEdit(task.id); if (e.key === 'Escape') setEditingId(null); }}
-                      style={{ fontSize: 14, fontWeight: 500, border: 'none', borderBottom: '2px solid #7C3AED', outline: 'none', padding: '2px 0', width: '100%', color: '#1C1917' }}
+                      className="body-text"
+                      style={editInputStyle}
                     />
                   ) : (
                     <>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                        <span style={{ width: 8, height: 8, borderRadius: '50%', flexShrink: 0, backgroundColor: P_COLORS[task.priority] }} />
-                        <span style={{ fontSize: 14, fontWeight: 500, color: isDone ? '#A8A29E' : '#1C1917', textDecoration: isDone ? 'line-through' : undefined, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                      <div style={taskTitleRowStyle}>
+                        <span style={priorityDotStyle(task.priority)} />
+                        <span className="body-text" style={{
+                          color: isDone ? 'var(--color-text-muted)' : 'var(--color-text)',
+                          textDecoration: isDone ? 'line-through' : undefined,
+                          overflow: 'hidden',
+                          textOverflow: 'ellipsis',
+                          whiteSpace: 'nowrap',
+                          fontWeight: 500,
+                        }}>
                           {task.title}
                         </span>
                       </div>
-                      <div style={{ display: 'flex', gap: 8, marginTop: 4, fontSize: 12, color: '#A8A29E', flexWrap: 'wrap' }}>
+                      <div className="caption" style={taskMetaStyle}>
                         {project && <span>{project.icon} {project.name}</span>}
                         {task.dueDate && <span>📅 {task.dueDate}</span>}
-                        {task.description && <span style={{ opacity: 0.7, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: 200 }}>{task.description}</span>}
+                        {task.description && (
+                          <span style={{ opacity: 0.7, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: 200 }}>
+                            {task.description}
+                          </span>
+                        )}
                       </div>
                     </>
                   )}
                 </div>
 
-                {/* 标签 */}
-                <span style={statusTagStyle(task.status)}>{statusLabel(task.status)}</span>
+                {/* 状态标签 */}
+                <span className="caption" style={statusTagStyle(task.status)}>
+                  {statusLabel(task.status)}
+                </span>
 
-                {/* 操作菜单 */}
-                <select value={task.status} onChange={(e) => moveTask(task.id, e.target.value as TaskStatus)}
-                  style={{ fontSize: 11, padding: '2px 4px', borderRadius: 4, border: '1px solid #E7E5E4', backgroundColor: '#FFF', color: '#78716C', cursor: 'pointer' }}>
+                {/* 快速切换状态 */}
+                <select
+                  value={task.status}
+                  onChange={(e) => moveTask(task.id, e.target.value as TaskStatus)}
+                  className="caption"
+                  style={statusSelectStyle}
+                >
                   <option value="inbox">📥</option>
                   <option value="todo">📌</option>
                   <option value="doing">⚡</option>
                   <option value="done">✅</option>
                 </select>
 
-                <button onClick={() => { if (confirm('删除任务？')) deleteTask(task.id); }}
-                  style={{ border: 'none', backgroundColor: 'transparent', color: '#D6D3D1', cursor: 'pointer', fontSize: 14, padding: 2 }}
-                  onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.color = '#EF4444'; }}
-                  onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.color = '#D6D3D1'; }}
-                >✕</button>
+                {/* 删除 */}
+                <button
+                  onClick={() => { if (confirm('删除任务？')) deleteTask(task.id); }}
+                  style={deleteBtnStyle}
+                  onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.color = '#d35d47'; }}
+                  onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.color = 'var(--color-text-muted)'; }}
+                  aria-label="删除"
+                >
+                  ×
+                </button>
               </div>
             );
           })}
@@ -208,72 +282,316 @@ function statusLabel(s: string): string {
   return m[s] ?? s;
 }
 
-/* ===== 样式 ===== */
-const fabStyle = (active: boolean): React.CSSProperties => ({
-  width: 42, height: 42, borderRadius: 13, border: 'none',
-  backgroundColor: active ? '#EF4444' : '#7C3AED', color: '#FFF',
-  fontSize: 22, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center',
-  transition: 'all 200ms ease', boxShadow: active ? 'none' : '0 2px 8px #7C3AED40',
-});
+function priorityDotStyle(p: Priority): React.CSSProperties {
+  const opacityMap: Record<Priority, number> = { 0: 1, 1: 0.7, 2: 0.45, 3: 0.3 };
+  return {
+    width: 8,
+    height: 8,
+    borderRadius: '50%',
+    flexShrink: 0,
+    backgroundColor: 'var(--color-primary)',
+    opacity: opacityMap[p],
+  };
+}
 
-const formCardStyle: React.CSSProperties = {
-  backgroundColor: '#FFF', borderRadius: 16, padding: 16, marginBottom: 16,
-  border: '1.5px solid #E7E5E4', display: 'flex', flexDirection: 'column', gap: 10,
-  animation: 'flow-slide-down 0.2s ease',
+/* ===== 样式常量 ===== */
+
+const pageStyle: React.CSSProperties = {
+  maxWidth: 720,
+  margin: '0 auto',
+  padding: 'var(--space-12) var(--space-6) var(--space-16)',
+  fontFamily: 'var(--font-body)',
 };
 
-const priorityBtnStyle = (active: boolean, color: string): React.CSSProperties => ({
-  padding: '4px 10px', fontSize: 12, fontWeight: 600, borderRadius: 6, cursor: 'pointer', transition: 'all 150ms ease',
-  border: `2px solid ${active ? color : '#E7E5E4'}`,
-  backgroundColor: active ? color + '15' : '#FFF', color,
+const headerStyle: React.CSSProperties = {
+  display: 'flex',
+  justifyContent: 'space-between',
+  alignItems: 'flex-start',
+  marginBottom: 'var(--space-8)',
+};
+
+const pageTitleStyle: React.CSSProperties = {
+  fontFamily: 'var(--font-display)',
+  margin: 0,
+  color: 'var(--color-text)',
+  letterSpacing: '-0.02em',
+};
+
+const subtitleStyle: React.CSSProperties = {
+  color: 'var(--color-text-muted)',
+  margin: 'var(--space-2) 0 0',
+};
+
+const fabStyle = (active: boolean): React.CSSProperties => ({
+  width: 44,
+  height: 44,
+  borderRadius: 'var(--radius-full)',
+  border: 'none',
+  backgroundColor: active ? 'var(--color-text-muted)' : 'var(--color-primary)',
+  color: 'var(--color-surface)',
+  fontSize: 24,
+  fontWeight: 300,
+  cursor: 'pointer',
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+  transition: 'all var(--transition-fast) var(--ease-out-quart)',
+  lineHeight: 1,
+  padding: 0,
+});
+
+const formSectionStyle: React.CSSProperties = {
+  display: 'flex',
+  flexDirection: 'column',
+  gap: 'var(--space-4)',
+  marginBottom: 'var(--space-8)',
+  paddingBottom: 'var(--space-6)',
+  borderBottom: '1px solid var(--color-divider)',
+};
+
+const inputStyle: React.CSSProperties = {
+  fontSize: 'inherit',
+  fontWeight: 500,
+  border: 'none',
+  borderBottom: '1.5px solid var(--color-border)',
+  outline: 'none',
+  padding: 'var(--space-2) 0',
+  color: 'var(--color-text)',
+  backgroundColor: 'transparent',
+  fontFamily: 'inherit',
+  width: '100%',
+  transition: 'border-color var(--transition-fast) var(--ease-out-quart)',
+  borderRadius: 0,
+};
+
+const formRowStyle: React.CSSProperties = {
+  display: 'flex',
+  gap: 'var(--space-3)',
+  alignItems: 'center',
+  flexWrap: 'wrap',
+};
+
+const priorityBtnStyle = (active: boolean): React.CSSProperties => ({
+  padding: 'var(--space-1) var(--space-4)',
+  fontSize: 'inherit',
+  fontWeight: 600,
+  borderRadius: 'var(--radius-full)',
+  cursor: 'pointer',
+  transition: 'all var(--transition-fast) var(--ease-out-quart)',
+  border: active ? '1.5px solid var(--color-primary)' : '1.5px solid var(--color-border)',
+  backgroundColor: active ? 'var(--color-primary-subtle)' : 'transparent',
+  color: active ? 'var(--color-primary)' : 'var(--color-text-muted)',
+  fontFamily: 'inherit',
 });
 
 const miniInputStyle: React.CSSProperties = {
-  fontSize: 13, padding: '5px 8px', borderRadius: 6, border: '1.5px solid #E7E5E4', color: '#292524',
+  fontSize: 'inherit',
+  padding: 'var(--space-1) var(--space-3)',
+  borderRadius: 'var(--radius-md)',
+  border: 'none',
+  borderBottom: '1.5px solid var(--color-border)',
+  color: 'var(--color-text)',
+  backgroundColor: 'transparent',
+  fontFamily: 'inherit',
+  outline: 'none',
 };
 
 const submitBtnStyle: React.CSSProperties = {
-  padding: '6px 16px', fontSize: 13, fontWeight: 600, backgroundColor: '#7C3AED', color: '#FFF',
-  border: 'none', borderRadius: 8, cursor: 'pointer', transition: 'all 150ms ease',
+  padding: 'var(--space-2) var(--space-6)',
+  fontSize: 'inherit',
+  fontWeight: 600,
+  backgroundColor: 'var(--color-primary)',
+  color: 'var(--color-surface)',
+  border: 'none',
+  borderRadius: 'var(--radius-full)',
+  cursor: 'pointer',
+  transition: 'all var(--transition-fast) var(--ease-out-quart)',
+  fontFamily: 'inherit',
+};
+
+const filterBarStyle: React.CSSProperties = {
+  display: 'flex',
+  gap: 'var(--space-2)',
+  overflowX: 'auto',
+  paddingBottom: 'var(--space-3)',
+  scrollbarWidth: 'none',
 };
 
 const filterBtnStyle = (active: boolean): React.CSSProperties => ({
-  display: 'flex', alignItems: 'center', gap: 5, padding: '7px 15px', fontSize: 13,
-  fontWeight: active ? 600 : 400, borderRadius: 20, border: 'none', whiteSpace: 'nowrap',
-  cursor: 'pointer', transition: 'all 150ms ease',
-  backgroundColor: active ? '#EDE9FE' : '#F5F5F4', color: active ? '#5B21B6' : '#78716C',
+  display: 'flex',
+  alignItems: 'center',
+  gap: 5,
+  padding: 'var(--space-2) var(--space-4)',
+  fontSize: 'inherit',
+  fontWeight: active ? 600 : 400,
+  borderRadius: 'var(--radius-full)',
+  border: 'none',
+  whiteSpace: 'nowrap',
+  cursor: 'pointer',
+  transition: 'all var(--transition-fast) var(--ease-out-quart)',
+  backgroundColor: active ? 'var(--color-primary-subtle)' : 'transparent',
+  color: active ? 'var(--color-primary)' : 'var(--color-text-secondary)',
+  fontFamily: 'inherit',
 });
 
+const dividerStyle: React.CSSProperties = {
+  height: 1,
+  backgroundColor: 'var(--color-divider)',
+  margin: 'var(--space-3) 0 var(--space-6)',
+};
+
+const listStyle: React.CSSProperties = {
+  display: 'flex',
+  flexDirection: 'column',
+};
+
 const taskItemStyle: React.CSSProperties = {
-  backgroundColor: '#FFF', borderRadius: 14, padding: '12px 14px', border: '1.5px solid #E7E5E4',
-  display: 'flex', alignItems: 'center', gap: 10, transition: 'all 150ms ease',
+  display: 'flex',
+  alignItems: 'center',
+  gap: 'var(--space-4)',
+  padding: 'var(--space-4) var(--space-2)',
+  transition: 'background var(--transition-fast) var(--ease-out-quart)',
   cursor: 'default',
+  borderBottom: '1px solid var(--color-divider)',
+};
+
+const taskTitleRowStyle: React.CSSProperties = {
+  display: 'flex',
+  alignItems: 'center',
+  gap: 'var(--space-3)',
+};
+
+const taskMetaStyle: React.CSSProperties = {
+  display: 'flex',
+  gap: 'var(--space-3)',
+  marginTop: 'var(--space-1)',
+  color: 'var(--color-text-muted)',
+  flexWrap: 'wrap' as const,
 };
 
 const checkStyle = (done: boolean): React.CSSProperties => ({
-  width: 22, height: 22, borderRadius: '50%', cursor: 'pointer',
-  display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
-  border: `2px solid ${done ? '#10B981' : '#D6D3D1'}`,
-  backgroundColor: done ? '#10B981' : 'transparent', color: '#FFF', fontSize: 12,
-  transition: 'all 150ms ease',
+  width: 22,
+  height: 22,
+  borderRadius: 'var(--radius-full)',
+  cursor: 'pointer',
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+  flexShrink: 0,
+  border: done ? '2px solid var(--color-success)' : '2px solid var(--color-border)',
+  backgroundColor: done ? 'var(--color-success)' : 'transparent',
+  color: 'var(--color-surface)',
+  fontSize: 13,
+  transition: 'all var(--transition-fast) var(--ease-out-quart)',
+  padding: 0,
+  lineHeight: 1,
 });
 
 const statusTagStyle = (status: string): React.CSSProperties => {
-  const m: Record<string, { bg: string; c: string }> = {
-    inbox: { bg: '#FEF3C7', c: '#92400E' }, todo: { bg: '#DBEAFE', c: '#1E40AF' },
-    doing: { bg: '#EDE9FE', c: '#5B21B6' }, done: { bg: '#D1FAE5', c: '#065F46' },
+  const isPrimary = status === 'doing';
+  const isSuccess = status === 'done';
+  return {
+    fontSize: 'inherit',
+    padding: 'var(--space-0) var(--space-3)',
+    borderRadius: 'var(--radius-full)',
+    backgroundColor: isPrimary
+      ? 'var(--color-primary)'
+      : isSuccess
+        ? 'var(--color-success)'
+        : 'var(--color-primary-subtle)',
+    color: (isPrimary || isSuccess) ? 'var(--color-surface)' : 'var(--color-text-secondary)',
+    fontWeight: 500,
+    flexShrink: 0,
   };
-  const s = m[status] ?? { bg: '#F5F5F4', c: '#78716C' };
-  return { fontSize: 11, padding: '2px 8px', borderRadius: 5, backgroundColor: s.bg, color: s.c, fontWeight: 500, flexShrink: 0 };
+};
+
+const statusSelectStyle: React.CSSProperties = {
+  fontSize: 'inherit',
+  padding: 'var(--space-0) var(--space-1)',
+  borderRadius: 'var(--radius-sm)',
+  border: '1px solid var(--color-border)',
+  backgroundColor: 'transparent',
+  color: 'var(--color-text-secondary)',
+  cursor: 'pointer',
+  fontFamily: 'inherit',
+};
+
+const deleteBtnStyle: React.CSSProperties = {
+  border: 'none',
+  backgroundColor: 'transparent',
+  color: 'var(--color-text-muted)',
+  cursor: 'pointer',
+  fontSize: 16,
+  padding: 'var(--space-1)',
+  transition: 'color var(--transition-fast) var(--ease-out-quart)',
+  lineHeight: 1,
+};
+
+const editInputStyle: React.CSSProperties = {
+  fontSize: 'inherit',
+  fontWeight: 500,
+  border: 'none',
+  borderBottom: '2px solid var(--color-primary)',
+  outline: 'none',
+  padding: 'var(--space-1) 0',
+  width: '100%',
+  color: 'var(--color-text)',
+  backgroundColor: 'transparent',
+  fontFamily: 'inherit',
+};
+
+/* 空状态 */
+const emptyStyle: React.CSSProperties = {
+  textAlign: 'center',
+  padding: 'var(--space-20) var(--space-6)',
+  color: 'var(--color-text-muted)',
+};
+
+const emptyEmojiStyle: React.CSSProperties = {
+  fontFamily: 'var(--font-display)',
+  margin: '0 0 var(--space-6)',
+  fontSize: 64,
+  lineHeight: 1,
+};
+
+const emptyTitleStyle: React.CSSProperties = {
+  fontFamily: 'var(--font-display)',
+  color: 'var(--color-text-secondary)',
+  margin: '0 0 var(--space-2)',
+};
+
+const emptyDescStyle: React.CSSProperties = {
+  color: 'var(--color-text-muted)',
+  margin: '0 0 var(--space-6)',
+};
+
+const emptyBtnStyle: React.CSSProperties = {
+  padding: 'var(--space-3) var(--space-8)',
+  fontSize: 14,
+  fontWeight: 600,
+  color: 'var(--color-surface)',
+  backgroundColor: 'var(--color-primary)',
+  border: 'none',
+  borderRadius: 'var(--radius-full)',
+  cursor: 'pointer',
+  transition: 'all var(--transition-fast) var(--ease-out-quart)',
+  fontFamily: 'var(--font-body)',
 };
 
 function CountBadge({ count, active }: { count: number; active: boolean }) {
   if (count === 0) return null;
   return (
-    <span style={{
-      fontSize: 10, fontWeight: 600, padding: '1px 5px', borderRadius: 8,
-      backgroundColor: active ? '#C4B5FD' : '#D6D3D1', color: active ? '#5B21B6' : '#78716C',
-      minWidth: 18, textAlign: 'center',
-    }}>{count}</span>
+    <span className="caption" style={{
+      fontWeight: 600,
+      padding: '1px 6px',
+      borderRadius: 'var(--radius-full)',
+      backgroundColor: active ? 'var(--color-primary)' : 'var(--color-border)',
+      color: active ? 'var(--color-surface)' : 'var(--color-text-muted)',
+      minWidth: 18,
+      textAlign: 'center',
+      fontSize: 10,
+    }}>
+      {count}
+    </span>
   );
 }

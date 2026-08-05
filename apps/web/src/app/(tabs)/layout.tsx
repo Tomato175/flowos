@@ -7,7 +7,13 @@ export default function TabsLayout({ children }: { children: React.ReactNode }) 
   return (
     <>
       <TabBar />
-      <main style={{ marginLeft: 200, minHeight: '100vh' }}>{children}</main>
+      <main style={{
+        marginLeft: 200,
+        minHeight: '100vh',
+        background: 'var(--color-bg)',
+      }}>
+        {children}
+      </main>
       <MiniPlayer />
     </>
   );

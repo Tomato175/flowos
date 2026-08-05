@@ -13,10 +13,8 @@ export function MiniPlayer() {
   const customTrack = customTracks.find((t) => t.id === activeSound);
   const fileRef = useRef<HTMLInputElement>(null);
 
-  // 音频引擎联动
   useEffect(() => {
     if (activeSound && isPlaying) {
-      // 如果是自定义音轨，用它的 URL；否则用内置ID
       const track = customTracks.find((t) => t.id === activeSound);
       playAmbient(track ? track.url : activeSound, volume);
     } else if (!isPlaying || !activeSound) {
@@ -32,7 +30,7 @@ export function MiniPlayer() {
   const handleUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
     if (!files || files.length === 0) return;
-    e.target.value = ''; // reset early so user can re-upload same file
+    e.target.value = '';
 
     if (!user) {
       alert('请先登录后再上传音乐（音乐需要保存到云端才能持久化）');
@@ -59,7 +57,6 @@ export function MiniPlayer() {
 
       const { data: urlData } = supabase.storage.from('music').getPublicUrl(filePath);
       addCustomTrack({ id: trackId, name: trackName, url: urlData.publicUrl });
-      // addCustomTrack already sets activeSound + isPlaying
     } catch (err) {
       console.error('Upload failed:', err);
       alert('上传失败，请重试');
@@ -70,30 +67,67 @@ export function MiniPlayer() {
 
   return (
     <div style={{
-      position: 'fixed', bottom: 68, left: '50%', transform: 'translateX(-50%)',
-      backgroundColor: '#FFF', borderRadius: 16, padding: '8px 14px',
-      border: '1.5px solid #E7E5E4', display: 'flex', alignItems: 'center', gap: 8,
-      boxShadow: '0 2px 12px rgba(0,0,0,0.08)', zIndex: 49, maxWidth: 'calc(100vw - 32px)',
+      position: 'fixed',
+      bottom: 'var(--space-6)',
+      left: '50%',
+      transform: 'translateX(-50%)',
+      marginLeft: 100,
+      background: 'var(--color-surface)',
+      borderRadius: 'var(--radius-full)',
+      padding: 'var(--space-2) var(--space-4)',
+      border: '1px solid var(--color-border)',
+      display: 'flex',
+      alignItems: 'center',
+      gap: 'var(--space-2)',
+      boxShadow: 'var(--shadow-md)',
+      zIndex: 49,
+      maxWidth: 'calc(100vw - 32px)',
     }}>
       <button onClick={togglePlay}
         style={{
-          width: 32, height: 32, borderRadius: '50%', border: 'none',
-          backgroundColor: '#7C3AED', color: '#FFF', fontSize: 13,
-          cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center',
+          width: 30,
+          height: 30,
+          borderRadius: 'var(--radius-full)',
+          border: 'none',
+          background: 'var(--color-primary)',
+          color: '#fff',
+          fontSize: 'var(--text-xs)',
+          cursor: 'pointer',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          flexShrink: 0,
+          transition: 'background var(--transition-fast)',
         }}>
         {isPlaying ? '⏸' : '▶'}
       </button>
 
-      <span style={{ fontSize: 12, fontWeight: 600, whiteSpace: 'nowrap' }}>
+      <span className="body-small" style={{
+        fontWeight: 'var(--weight-medium)',
+        whiteSpace: 'nowrap',
+        color: 'var(--color-text)',
+      }}>
         {customTrack ? '🎵' : sound?.emoji} {customTrack ? customTrack.name : sound?.label}
       </span>
 
       <input type="range" min={0} max={1} step={0.05} value={volume}
         onChange={(e) => setVolume(Number(e.target.value))}
-        style={{ width: 48, accentColor: '#7C3AED' }} />
+        style={{
+          width: 48,
+          accentColor: 'var(--color-primary)',
+          height: 3,
+        }} />
 
       <select value={activeSound || ''} onChange={(e) => setActiveSound(e.target.value || null)}
-        style={{ fontSize: 11, padding: '2px 4px', borderRadius: 6, border: '1px solid #E7E5E4', maxWidth: 80 }}>
+        style={{
+          fontSize: 'var(--text-xs)',
+          padding: '2px 4px',
+          borderRadius: 'var(--radius-sm)',
+          border: '1px solid var(--color-border)',
+          background: 'var(--color-surface)',
+          color: 'var(--color-text-secondary)',
+          maxWidth: 80,
+        }}>
         <optgroup label="内置">
           {AMBIENT_SOUNDS.map((s) => (
             <option key={s.id} value={s.id}>{s.emoji} {s.label}</option>
@@ -109,12 +143,29 @@ export function MiniPlayer() {
       </select>
 
       <button onClick={() => fileRef.current?.click()}
-        style={{ border: 'none', backgroundColor: '#EDE9FE', color: '#7C3AED', cursor: 'pointer', fontSize: 14, padding: '3px 6px', borderRadius: 6 }}
+        style={{
+          border: 'none',
+          background: 'var(--color-primary-subtle)',
+          color: 'var(--color-primary-dark)',
+          cursor: 'pointer',
+          fontSize: 'var(--text-sm)',
+          padding: 'var(--space-1) var(--space-2)',
+          borderRadius: 'var(--radius-sm)',
+          transition: 'background var(--transition-fast)',
+        }}
         title="上传音乐">📤</button>
       <input ref={fileRef} type="file" accept="audio/*" onChange={handleUpload} style={{ display: 'none' }} />
 
       <button onClick={stop}
-        style={{ border: 'none', backgroundColor: 'transparent', color: '#D6D3D1', cursor: 'pointer', fontSize: 16, padding: 2 }}>
+        style={{
+          border: 'none',
+          background: 'transparent',
+          color: 'var(--color-text-muted)',
+          cursor: 'pointer',
+          fontSize: 'var(--text-sm)',
+          padding: 2,
+          lineHeight: 1,
+        }}>
         ✕
       </button>
     </div>

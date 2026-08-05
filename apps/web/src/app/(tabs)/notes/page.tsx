@@ -65,7 +65,7 @@ export default function NotesPage() {
     if (!journalContent.trim()) return;
     doSave();
     setSaved(true);
-    setToast('✅ 保存成功！可在「📔 今日日记」或「📝 笔记本」查看');
+    setToast('保存成功！可在「📔 今日日记」或「📝 笔记本」查看');
     setTimeout(() => { setToast(null); setSaved(false); }, 3000);
   };
 
@@ -76,66 +76,84 @@ export default function NotesPage() {
   const unpinned = filtered.filter((n) => !n.isPinned);
 
   return (
-    <div style={{ maxWidth: 720, margin: '0 auto', padding: '24px 20px' }}>
+    <div className="animate-enter" style={pageStyle}>
       {/* 头部标签切换 */}
-      <div style={{ display: 'flex', gap: 4, marginBottom: 20 }}>
-        <TabBtn active={tab === 'journal'} onClick={() => setTab('journal')}>📔 今日日记</TabBtn>
-        <TabBtn active={tab === 'notes'} onClick={() => setTab('notes')}>📝 笔记本</TabBtn>
+      <div style={tabBarStyle}>
+        <button
+          onClick={() => setTab('journal')}
+          className="body-text"
+          style={tabBtnStyle(tab === 'journal')}
+        >
+          今日日记
+        </button>
+        <button
+          onClick={() => setTab('notes')}
+          className="body-text"
+          style={tabBtnStyle(tab === 'notes')}
+        >
+          笔记本
+        </button>
       </div>
 
       {/* ===== 日记 ===== */}
       {tab === 'journal' && (
         <div>
+          {/* 日期标题 */}
+          <div style={journalHeaderStyle}>
+            <h1 className="display-medium" style={journalTitleStyle}>今日日记</h1>
+            <p className="body-small" style={journalDateStyle}>{todayStr}</p>
+          </div>
+
           {/* 模板选择 */}
-          <div style={{ display: 'flex', gap: 6, marginBottom: 12 }}>
+          <div style={templateBarStyle}>
             {JOURNAL_TEMPLATES.map((t) => (
-              <button key={t.label} onClick={() => setJournalContent(t.template)}
-                style={{
-                  padding: '4px 12px', fontSize: 12, borderRadius: 14, border: '1px solid #E7E5E4',
-                  backgroundColor: journalContent === t.template ? '#EDE9FE' : '#FFF',
-                  color: journalContent === t.template ? '#5B21B6' : '#78716C', cursor: 'pointer',
-                }}>
+              <button
+                key={t.label}
+                onClick={() => setJournalContent(t.template)}
+                className="caption"
+                style={templateBtnStyle(journalContent === t.template)}
+              >
                 {t.label}
               </button>
             ))}
           </div>
 
           {/* 编辑器 */}
-          <textarea ref={contentRef} value={journalContent} onChange={(e) => setJournalContent(e.target.value)}
+          <textarea
+            ref={contentRef}
+            value={journalContent}
+            onChange={(e) => setJournalContent(e.target.value)}
             placeholder="开始写今天的日记..."
-            style={{
-              width: '100%', minHeight: 300, padding: 16, fontSize: 15, lineHeight: 1.7,
-              border: '1.5px solid #E7E5E4', borderRadius: 14, resize: 'vertical',
-              fontFamily: 'inherit', outline: 'none', color: '#292524',
-            }}
+            className="body-text"
+            style={editorStyle}
           />
 
           {/* 操作栏 */}
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 10, flexWrap: 'wrap', gap: 8 }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-              <button onClick={saveJournal}
-                style={{ padding: '10px 24px', fontSize: 14, fontWeight: 600, color: '#FFF', backgroundColor: saved ? '#10B981' : '#7C3AED', border: 'none', borderRadius: 10, cursor: 'pointer', transition: 'background 200ms' }}>
-                {saved ? '✅ 已保存' : '💾 保存日记'}
+          <div style={editorActionsStyle}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-4)' }}>
+              <button
+                onClick={saveJournal}
+                className="label-text"
+                style={saveBtnStyle(saved)}
+              >
+                {saved ? '已保存' : '保存日记'}
               </button>
               {autoSaved && (
-                <span style={{ fontSize: 11, color: '#10B981', animation: 'fadeOut 2s' }}>已自动保存</span>
+                <span className="caption" style={autoSavedStyle}>已自动保存</span>
               )}
             </div>
-            <div style={{ display: 'flex', gap: 6 }}>
-              <button onClick={() => setJournalContent(JOURNAL_TEMPLATES[0]!.template)}
-                style={miniBtnStyle}>清空</button>
-            </div>
+            <button
+              onClick={() => setJournalContent(JOURNAL_TEMPLATES[0]!.template)}
+              className="body-small"
+              style={clearBtnStyle}
+            >
+              清空
+            </button>
           </div>
 
           {/* Toast 提示 */}
           {toast && (
-            <div style={{
-              position: 'fixed', bottom: 100, left: '50%', transform: 'translateX(-50%)',
-              padding: '10px 20px', fontSize: 13, borderRadius: 10,
-              backgroundColor: '#1C1917', color: '#FFF', zIndex: 200,
-              boxShadow: '0 4px 16px rgba(0,0,0,0.2)', whiteSpace: 'nowrap',
-              animation: 'fadeIn 0.3s ease',
-            }}>
+            <div className="animate-enter" style={toastStyle}>
               {toast}
             </div>
           )}
@@ -145,30 +163,62 @@ export default function NotesPage() {
       {/* ===== 笔记本 ===== */}
       {tab === 'notes' && (
         <div>
-          <div style={{ display: 'flex', gap: 10, marginBottom: 16 }}>
-            <input value={search} onChange={(e) => setSearch(e.target.value)}
-              placeholder="搜索笔记..." style={{
-                flex: 1, padding: '10px 14px', fontSize: 14, border: '1.5px solid #E7E5E4', borderRadius: 10, outline: 'none',
-              }}
+          {/* 搜索与新建 */}
+          <div style={notesToolbarStyle}>
+            <input
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              placeholder="搜索笔记..."
+              className="body-text"
+              style={searchInputStyle}
             />
-            <button onClick={() => {
-              addNote({ title: '新笔记', content: '', noteType: 'note', journalDate: null, tags: [], isPinned: false, isArchived: false });
-            }}
-              style={{ padding: '10px 20px', fontSize: 14, fontWeight: 600, color: '#FFF', backgroundColor: '#7C3AED', border: 'none', borderRadius: 10, cursor: 'pointer' }}>
+            <button
+              onClick={() => {
+                addNote({ title: '新笔记', content: '', noteType: 'note', journalDate: null, tags: [], isPinned: false, isArchived: false });
+              }}
+              className="label-text"
+              style={newNoteBtnStyle}
+            >
               + 新建
             </button>
           </div>
 
           {/* 置顶笔记 */}
-          {pinned.map((n) => <NoteCard key={n.id} note={n} onUpdate={(u) => updateNote(n.id, u)} onDelete={() => deleteNote(n.id)} onPin={() => pinNote(n.id)} onConvert={() => { addTask({ title: n.title, description: n.content, status: 'inbox', priority: 2, dueDate: null, estimatedMinutes: null, projectId: null, tags: n.tags, isRecurring: false }); alert('已添加到任务收件箱！'); }} />)}
+          {pinned.length > 0 && (
+            <>
+              <p className="label-text" style={sectionLabelStyle}>置顶</p>
+              {pinned.map((n) => (
+                <NoteCard
+                  key={n.id}
+                  note={n}
+                  onUpdate={(u) => updateNote(n.id, u)}
+                  onDelete={() => deleteNote(n.id)}
+                  onPin={() => pinNote(n.id)}
+                  onConvert={() => { addTask({ title: n.title, description: n.content, status: 'inbox', priority: 2, dueDate: null, estimatedMinutes: null, projectId: null, tags: n.tags, isRecurring: false }); alert('已添加到任务收件箱！'); }}
+                />
+              ))}
+              <div style={dividerStyle} />
+            </>
+          )}
 
           {/* 普通笔记 */}
-          {unpinned.map((n) => <NoteCard key={n.id} note={n} onUpdate={(u) => updateNote(n.id, u)} onDelete={() => deleteNote(n.id)} onPin={() => pinNote(n.id)} onConvert={() => { addTask({ title: n.title, description: n.content, status: 'inbox', priority: 2, dueDate: null, estimatedMinutes: null, projectId: null, tags: n.tags, isRecurring: false }); alert('已添加到任务收件箱！'); }} />)}
+          {unpinned.map((n) => (
+            <NoteCard
+              key={n.id}
+              note={n}
+              onUpdate={(u) => updateNote(n.id, u)}
+              onDelete={() => deleteNote(n.id)}
+              onPin={() => pinNote(n.id)}
+              onConvert={() => { addTask({ title: n.title, description: n.content, status: 'inbox', priority: 2, dueDate: null, estimatedMinutes: null, projectId: null, tags: n.tags, isRecurring: false }); alert('已添加到任务收件箱！'); }}
+            />
+          ))}
 
           {filtered.length === 0 && (
-            <div style={{ textAlign: 'center', padding: 40, color: '#A8A29E' }}>
-              <p style={{ fontSize: 36, margin: '0 0 8px' }}>📝</p>
-              <p style={{ fontSize: 14 }}>{search ? '没有匹配的笔记' : '还没有笔记'}</p>
+            <div style={emptyStyle}>
+              <p className="display-large" style={emptyEmojiStyle}>📝</p>
+              <p className="heading-3" style={emptyTitleStyle}>
+                {search ? '没有匹配的笔记' : '还没有笔记'}
+              </p>
             </div>
           )}
         </div>
@@ -188,9 +238,9 @@ function NoteCard({ note, onUpdate, onDelete, onPin, onConvert }: {
 
   // 渲染 Markdown 中的 [[链接]]
   const renderContent = (content: string) => {
-    if (!content) return <span style={{ color: '#A8A29E', fontSize: 13 }}>空内容</span>;
+    if (!content) return <span className="body-small" style={{ color: 'var(--color-text-muted)' }}>空内容</span>;
     const html = content
-      .replace(/\[\[(.+?)\]\]/g, '<span style="color:#7C3AED;background:#EDE9FE;padding:0 4px;border-radius:4px;font-size:12px">📎 $1</span>')
+      .replace(/\[\[(.+?)\]\]/g, '<span style="color:var(--color-primary);background:var(--color-primary-subtle);padding:0 4px;border-radius:var(--radius-sm);font-size:12px">📎 $1</span>')
       .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
       .replace(/\*(.+?)\*/g, '<em>$1</em>')
       .replace(/\n/g, '<br/>');
@@ -198,72 +248,336 @@ function NoteCard({ note, onUpdate, onDelete, onPin, onConvert }: {
   };
 
   return (
-    <div style={noteCardStyle}>
-      <div style={{ display: 'flex', alignItems: 'flex-start', gap: 8 }}>
-        {note.isPinned && <span style={{ color: '#F59E0B', fontSize: 14 }}>📌</span>}
+    <div style={noteItemStyle}>
+      <div style={noteContentStyle}>
+        {note.isPinned && <span style={{ color: 'var(--color-primary)', fontSize: 12, flexShrink: 0 }}>📌</span>}
         <div style={{ flex: 1, minWidth: 0 }}>
           {editing ? (
-            <input value={title} onChange={(e) => setTitle(e.target.value)}
+            <input
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
               onBlur={() => { onUpdate({ title }); setEditing(false); }}
               onKeyDown={(e) => { if (e.key === 'Enter') { onUpdate({ title }); setEditing(false); } }}
               autoFocus
-              style={{ fontSize: 14, fontWeight: 600, border: 'none', borderBottom: '2px solid #7C3AED', outline: 'none', width: '100%', padding: '2px 0' }}
+              className="body-text"
+              style={editTitleStyle}
             />
           ) : (
-            <div style={{ fontSize: 14, fontWeight: 600, color: '#1C1917', cursor: 'pointer' }}
-              onClick={() => setEditing(true)}>
+            <div
+              className="body-text"
+              style={noteTitleStyle}
+              onClick={() => setEditing(true)}
+            >
               {note.title || '无标题'}
             </div>
           )}
           {note.tags.length > 0 && (
-            <div style={{ display: 'flex', gap: 4, marginTop: 4 }}>
+            <div style={tagsRowStyle}>
               {note.tags.map((t) => (
-                <span key={t} style={{ fontSize: 10, padding: '1px 6px', borderRadius: 4, backgroundColor: '#EDE9FE', color: '#7C3AED' }}>{t}</span>
+                <span key={t} className="caption" style={tagBadgeStyle}>{t}</span>
               ))}
             </div>
           )}
-          <div style={{ fontSize: 13, color: '#78716C', marginTop: 4, lineHeight: 1.5, cursor: 'pointer' }} onClick={() => setExpanded(!expanded)}>
+          <div
+            className="body-small"
+            style={notePreviewStyle}
+            onClick={() => setExpanded(!expanded)}
+          >
             {expanded ? renderContent(note.content) : <span>{note.content.slice(0, 120)}{note.content.length > 120 ? '...' : ''}</span>}
           </div>
-          <div style={{ fontSize: 11, color: '#A8A29E', marginTop: 4 }}>
+          <span className="caption" style={noteTimeStyle}>
             {new Date(note.updatedAt).toLocaleString('zh-CN')}
-          </div>
+          </span>
         </div>
       </div>
-      <div style={{ display: 'flex', gap: 4, marginTop: 8 }}>
-        <button onClick={onPin} style={actionBtnStyle} title="置顶">{note.isPinned ? '📌' : '📍'}</button>
-        <button onClick={onConvert} style={actionBtnStyle} title="转为任务">➡️</button>
-        <button onClick={onDelete} style={actionBtnStyle} title="删除">🗑</button>
+      <div style={noteActionsStyle}>
+        <button onClick={onPin} style={noteActionBtnStyle} title="置顶">{note.isPinned ? '📌' : '📍'}</button>
+        <button onClick={onConvert} style={noteActionBtnStyle} title="转为任务">➡️</button>
+        <button onClick={onDelete} style={noteActionBtnStyle} title="删除">×</button>
       </div>
     </div>
   );
 }
 
-/* ==== 样式 ==== */
+/* ==== 页面样式 ==== */
 
-function TabBtn({ active, onClick, children }: { active: boolean; onClick: () => void; children: React.ReactNode }) {
-  return (
-    <button onClick={onClick}
-      style={{
-        padding: '8px 20px', fontSize: 14, fontWeight: active ? 600 : 400, borderRadius: 10, border: 'none',
-        backgroundColor: active ? '#7C3AED' : '#F5F5F4', color: active ? '#FFF' : '#78716C',
-        cursor: 'pointer', transition: 'all 150ms ease',
-      }}>
-      {children}
-    </button>
-  );
-}
-
-const noteCardStyle: React.CSSProperties = {
-  backgroundColor: '#FFF', borderRadius: 14, padding: '14px 16px', marginBottom: 8,
-  border: '1.5px solid #E7E5E4', transition: 'all 150ms ease',
+const pageStyle: React.CSSProperties = {
+  maxWidth: 720,
+  margin: '0 auto',
+  padding: 'var(--space-12) var(--space-6) var(--space-16)',
+  fontFamily: 'var(--font-body)',
 };
 
-const actionBtnStyle: React.CSSProperties = {
-  border: 'none', backgroundColor: 'transparent', cursor: 'pointer', fontSize: 14, padding: '2px 6px',
+/* 标签栏 */
+const tabBarStyle: React.CSSProperties = {
+  display: 'flex',
+  gap: 'var(--space-2)',
+  marginBottom: 'var(--space-10)',
 };
 
-const miniBtnStyle: React.CSSProperties = {
-  padding: '6px 14px', fontSize: 12, borderRadius: 8, border: '1.5px solid #E7E5E4',
-  backgroundColor: '#FFF', color: '#78716C', cursor: 'pointer',
+const tabBtnStyle = (active: boolean): React.CSSProperties => ({
+  padding: 'var(--space-2) var(--space-6)',
+  fontSize: 'inherit',
+  fontWeight: active ? 600 : 400,
+  borderRadius: 'var(--radius-full)',
+  border: active ? '1.5px solid var(--color-primary)' : '1.5px solid var(--color-border)',
+  backgroundColor: active ? 'var(--color-primary-subtle)' : 'transparent',
+  color: active ? 'var(--color-primary)' : 'var(--color-text-secondary)',
+  cursor: 'pointer',
+  transition: 'all var(--transition-fast) var(--ease-out-quart)',
+  fontFamily: 'inherit',
+});
+
+/* 日记页 */
+const journalHeaderStyle: React.CSSProperties = {
+  marginBottom: 'var(--space-6)',
+};
+
+const journalTitleStyle: React.CSSProperties = {
+  fontFamily: 'var(--font-display)',
+  margin: 0,
+  color: 'var(--color-text)',
+  letterSpacing: '-0.02em',
+};
+
+const journalDateStyle: React.CSSProperties = {
+  color: 'var(--color-text-muted)',
+  margin: 'var(--space-2) 0 0',
+};
+
+const templateBarStyle: React.CSSProperties = {
+  display: 'flex',
+  gap: 'var(--space-2)',
+  marginBottom: 'var(--space-5)',
+};
+
+const templateBtnStyle = (active: boolean): React.CSSProperties => ({
+  padding: 'var(--space-1) var(--space-4)',
+  fontSize: 'inherit',
+  borderRadius: 'var(--radius-full)',
+  border: 'none',
+  backgroundColor: active ? 'var(--color-primary-subtle)' : 'transparent',
+  color: active ? 'var(--color-primary)' : 'var(--color-text-muted)',
+  cursor: 'pointer',
+  transition: 'all var(--transition-fast) var(--ease-out-quart)',
+  fontFamily: 'inherit',
+});
+
+const editorStyle: React.CSSProperties = {
+  width: '100%',
+  minHeight: 360,
+  padding: 'var(--space-6)',
+  fontSize: 'inherit',
+  lineHeight: 1.8,
+  border: '1px solid var(--color-border)',
+  borderRadius: 'var(--radius-lg)',
+  resize: 'vertical',
+  fontFamily: 'inherit',
+  outline: 'none',
+  color: 'var(--color-text)',
+  backgroundColor: 'var(--color-surface)',
+  transition: 'border-color var(--transition-fast) var(--ease-out-quart)',
+};
+
+const editorActionsStyle: React.CSSProperties = {
+  display: 'flex',
+  justifyContent: 'space-between',
+  alignItems: 'center',
+  marginTop: 'var(--space-4)',
+  flexWrap: 'wrap',
+  gap: 'var(--space-3)',
+};
+
+const saveBtnStyle = (saved: boolean): React.CSSProperties => ({
+  padding: 'var(--space-3) var(--space-8)',
+  fontSize: 'inherit',
+  fontWeight: 600,
+  color: 'var(--color-surface)',
+  backgroundColor: saved ? 'var(--color-success)' : 'var(--color-primary)',
+  border: 'none',
+  borderRadius: 'var(--radius-full)',
+  cursor: 'pointer',
+  transition: 'all var(--transition-fast) var(--ease-out-quart)',
+  fontFamily: 'inherit',
+});
+
+const autoSavedStyle: React.CSSProperties = {
+  color: 'var(--color-success)',
+  opacity: 0.8,
+};
+
+const clearBtnStyle: React.CSSProperties = {
+  padding: 'var(--space-2) var(--space-4)',
+  fontSize: 'inherit',
+  borderRadius: 'var(--radius-full)',
+  border: '1.5px solid var(--color-border)',
+  backgroundColor: 'transparent',
+  color: 'var(--color-text-muted)',
+  cursor: 'pointer',
+  transition: 'all var(--transition-fast) var(--ease-out-quart)',
+  fontFamily: 'inherit',
+};
+
+const toastStyle: React.CSSProperties = {
+  position: 'fixed',
+  bottom: 100,
+  left: '50%',
+  transform: 'translateX(-50%)',
+  padding: 'var(--space-3) var(--space-6)',
+  fontSize: 13,
+  borderRadius: 'var(--radius-full)',
+  backgroundColor: 'var(--color-text)',
+  color: 'var(--color-surface)',
+  zIndex: 200,
+  boxShadow: '0 4px 24px rgba(0,0,0,0.12)',
+  whiteSpace: 'nowrap',
+  fontFamily: 'var(--font-body)',
+};
+
+/* 笔记本 */
+const notesToolbarStyle: React.CSSProperties = {
+  display: 'flex',
+  gap: 'var(--space-4)',
+  marginBottom: 'var(--space-8)',
+};
+
+const searchInputStyle: React.CSSProperties = {
+  flex: 1,
+  padding: 'var(--space-3) 0',
+  fontSize: 'inherit',
+  border: 'none',
+  borderBottom: '1.5px solid var(--color-border)',
+  outline: 'none',
+  backgroundColor: 'transparent',
+  color: 'var(--color-text)',
+  fontFamily: 'inherit',
+  borderRadius: 0,
+  transition: 'border-color var(--transition-fast) var(--ease-out-quart)',
+};
+
+const newNoteBtnStyle: React.CSSProperties = {
+  padding: 'var(--space-3) var(--space-6)',
+  fontSize: 'inherit',
+  fontWeight: 600,
+  color: 'var(--color-surface)',
+  backgroundColor: 'var(--color-primary)',
+  border: 'none',
+  borderRadius: 'var(--radius-full)',
+  cursor: 'pointer',
+  transition: 'all var(--transition-fast) var(--ease-out-quart)',
+  fontFamily: 'inherit',
+  whiteSpace: 'nowrap',
+};
+
+const sectionLabelStyle: React.CSSProperties = {
+  color: 'var(--color-text-muted)',
+  margin: '0 0 var(--space-3)',
+  textTransform: 'uppercase',
+  letterSpacing: '0.04em',
+};
+
+const dividerStyle: React.CSSProperties = {
+  height: 1,
+  backgroundColor: 'var(--color-divider)',
+  margin: 'var(--space-6) 0',
+};
+
+/* 笔记项目 */
+const noteItemStyle: React.CSSProperties = {
+  padding: 'var(--space-4) 0',
+  borderBottom: '1px solid var(--color-divider)',
+  transition: 'background var(--transition-fast) var(--ease-out-quart)',
+};
+
+const noteContentStyle: React.CSSProperties = {
+  display: 'flex',
+  alignItems: 'flex-start',
+  gap: 'var(--space-3)',
+};
+
+const editTitleStyle: React.CSSProperties = {
+  fontSize: 'inherit',
+  fontWeight: 600,
+  border: 'none',
+  borderBottom: '2px solid var(--color-primary)',
+  outline: 'none',
+  width: '100%',
+  padding: 'var(--space-1) 0',
+  color: 'var(--color-text)',
+  backgroundColor: 'transparent',
+  fontFamily: 'inherit',
+  borderRadius: 0,
+};
+
+const noteTitleStyle: React.CSSProperties = {
+  fontWeight: 600,
+  color: 'var(--color-text)',
+  cursor: 'pointer',
+  fontFamily: 'var(--font-display)',
+};
+
+const tagsRowStyle: React.CSSProperties = {
+  display: 'flex',
+  gap: 'var(--space-1)',
+  marginTop: 'var(--space-1)',
+};
+
+const tagBadgeStyle: React.CSSProperties = {
+  fontSize: 'inherit',
+  padding: '1px var(--space-2)',
+  borderRadius: 'var(--radius-full)',
+  backgroundColor: 'var(--color-primary-subtle)',
+  color: 'var(--color-primary)',
+};
+
+const notePreviewStyle: React.CSSProperties = {
+  fontSize: 'inherit',
+  color: 'var(--color-text-secondary)',
+  marginTop: 'var(--space-2)',
+  lineHeight: 1.6,
+  cursor: 'pointer',
+};
+
+const noteTimeStyle: React.CSSProperties = {
+  color: 'var(--color-text-muted)',
+  display: 'block',
+  marginTop: 'var(--space-2)',
+};
+
+const noteActionsStyle: React.CSSProperties = {
+  display: 'flex',
+  gap: 'var(--space-1)',
+  marginTop: 'var(--space-3)',
+};
+
+const noteActionBtnStyle: React.CSSProperties = {
+  border: 'none',
+  backgroundColor: 'transparent',
+  cursor: 'pointer',
+  fontSize: 14,
+  padding: 'var(--space-1) var(--space-2)',
+  color: 'var(--color-text-muted)',
+  transition: 'color var(--transition-fast) var(--ease-out-quart)',
+  borderRadius: 'var(--radius-sm)',
+  fontFamily: 'inherit',
+  lineHeight: 1,
+};
+
+/* 空状态 */
+const emptyStyle: React.CSSProperties = {
+  textAlign: 'center',
+  padding: 'var(--space-16) var(--space-6)',
+};
+
+const emptyEmojiStyle: React.CSSProperties = {
+  fontFamily: 'var(--font-display)',
+  margin: '0 0 var(--space-4)',
+  fontSize: 48,
+  lineHeight: 1,
+};
+
+const emptyTitleStyle: React.CSSProperties = {
+  fontFamily: 'var(--font-display)',
+  color: 'var(--color-text-muted)',
+  margin: 0,
 };

@@ -103,34 +103,88 @@ export default function CalendarPage() {
   })();
 
   return (
-    <div style={{ maxWidth: 720, margin: '0 auto', padding: '24px 20px' }}>
+    <div style={{ maxWidth: 720, margin: '0 auto', padding: 'var(--space-12) var(--space-6) var(--space-16)' }}>
       {/* 头部 */}
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
-        <h1 style={{ fontSize: 24, fontWeight: 700, margin: 0, color: '#1C1917' }}>日历</h1>
-        <button onClick={goToday} style={{ padding: '6px 16px', fontSize: 13, color: '#7C3AED', backgroundColor: '#EDE9FE', border: 'none', borderRadius: 20, cursor: 'pointer' }}>今天</button>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: 'var(--space-6)' }}>
+        <h1
+          className="display-medium"
+          style={{
+            fontFamily: 'var(--font-display)',
+            color: 'var(--color-text)',
+            margin: 0,
+          }}
+        >
+          日历
+        </h1>
+        <button
+          onClick={goToday}
+          style={{
+            padding: 'var(--space-1) var(--space-4)',
+            fontFamily: 'var(--font-body)',
+            fontSize: 13,
+            fontWeight: 600,
+            color: 'var(--color-primary)',
+            backgroundColor: 'var(--color-primary-subtle)',
+            border: 'none',
+            borderRadius: 'var(--radius-full)',
+            cursor: 'pointer',
+            transition: 'var(--transition-fast)',
+          }}
+        >
+          今天
+        </button>
       </div>
 
       {/* 月份导航 */}
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 14 }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 'var(--space-4)' }}>
         <button onClick={prevMonth} style={navBtnStyle}>◀</button>
-        <span style={{ fontSize: 16, fontWeight: 600, color: '#1C1917' }}>{year}年 {monthNames[month]}</span>
+        <span
+          className="heading-2"
+          style={{
+            fontFamily: 'var(--font-display)',
+            color: 'var(--color-text)',
+          }}
+        >
+          {year}年 {monthNames[month]}
+        </span>
         <button onClick={nextMonth} style={navBtnStyle}>▶</button>
       </div>
 
       {/* 日历格子 */}
-      <div style={{ backgroundColor: '#FFF', borderRadius: 16, padding: '12px', border: '1.5px solid #E7E5E4', marginBottom: 20 }}>
+      <div
+        style={{
+          backgroundColor: 'var(--color-surface)',
+          borderRadius: 'var(--radius-lg)',
+          padding: 'var(--space-4)',
+          border: '1px solid var(--color-divider)',
+          marginBottom: 'var(--space-8)',
+        }}
+      >
         {/* 星期头 */}
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: 4, marginBottom: 8 }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: 'var(--space-1)', marginBottom: 'var(--space-2)' }}>
           {weekDays.map((d) => (
-            <div key={d} style={{ textAlign: 'center', fontSize: 12, fontWeight: 600, color: '#A8A29E', padding: '4px 0' }}>{d}</div>
+            <div
+              key={d}
+              className="caption"
+              style={{
+                textAlign: 'center',
+                fontFamily: 'var(--font-body)',
+                color: 'var(--color-text-muted)',
+                padding: 'var(--space-1) 0',
+                textTransform: 'uppercase',
+                letterSpacing: '0.04em',
+              }}
+            >
+              {d}
+            </div>
           ))}
         </div>
 
         {/* 日期 */}
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: 4 }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: 'var(--space-1)' }}>
           {/* 填充上月空白 */}
           {Array.from({ length: firstDayOfWeek }).map((_, i) => (
-            <div key={`empty-${i}`} style={{ aspectRatio: '1', borderRadius: 10 }} />
+            <div key={`empty-${i}`} style={{ aspectRatio: '1', borderRadius: 'var(--radius-md)' }} />
           ))}
 
           {Array.from({ length: daysInMonth }).map((_, i) => {
@@ -150,14 +204,23 @@ export default function CalendarPage() {
                   flexDirection: 'column',
                   alignItems: 'center',
                   justifyContent: 'center',
-                  borderRadius: 10,
-                  border: isSelected ? '2px solid #7C3AED' : '2px solid transparent',
-                  backgroundColor: isSelected ? '#EDE9FE' : isToday ? '#F5F5F4' : 'transparent',
+                  borderRadius: 'var(--radius-md)',
+                  border: isSelected
+                    ? '1.5px solid var(--color-primary)'
+                    : '1.5px solid transparent',
+                  backgroundColor: isSelected
+                    ? 'var(--color-primary-subtle)'
+                    : isToday
+                      ? 'var(--color-surface-hover)'
+                      : 'transparent',
                   cursor: 'pointer',
+                  fontFamily: 'var(--font-body)',
                   fontSize: 14,
                   fontWeight: isToday ? 700 : 400,
-                  color: isSelected ? '#5B21B6' : '#1C1917',
-                  transition: 'all 150ms ease',
+                  color: isSelected
+                    ? 'var(--color-primary)'
+                    : 'var(--color-text)',
+                  transition: 'var(--transition-fast)',
                   position: 'relative',
                 }}
               >
@@ -165,11 +228,11 @@ export default function CalendarPage() {
                 {/* 活动指示点 */}
                 {act && (
                   <div style={{ display: 'flex', gap: 2, marginTop: 2 }}>
-                    {act.focus > 0 && <span style={{ width: 4, height: 4, borderRadius: '50%', backgroundColor: '#7C3AED' }} />}
-                    {act.tasks > 0 && <span style={{ width: 4, height: 4, borderRadius: '50%', backgroundColor: '#3B82F6' }} />}
-                    {act.habits > 0 && <span style={{ width: 4, height: 4, borderRadius: '50%', backgroundColor: '#10B981' }} />}
-                    {act.journal && <span style={{ width: 4, height: 4, borderRadius: '50%', backgroundColor: '#EC4899' }} />}
-                    {act.mood && <span style={{ width: 4, height: 4, borderRadius: '50%', backgroundColor: '#F59E0B' }} />}
+                    {act.focus > 0 && <Dot color="var(--color-primary)" />}
+                    {act.tasks > 0 && <Dot color="var(--color-info)" />}
+                    {act.habits > 0 && <Dot color="var(--color-success)" />}
+                    {act.journal && <Dot color="#EC4899" />}
+                    {act.mood && <Dot color="var(--color-warning)" />}
                   </div>
                 )}
               </button>
@@ -178,18 +241,25 @@ export default function CalendarPage() {
         </div>
 
         {/* 图例 */}
-        <div style={{ display: 'flex', gap: 12, justifyContent: 'center', marginTop: 10, fontSize: 11, color: '#A8A29E' }}>
-          <span><Dot color="#7C3AED" /> 专注</span>
-          <span><Dot color="#3B82F6" /> 任务</span>
-          <span><Dot color="#10B981" /> 习惯</span>
-          <span><Dot color="#EC4899" /> 日记</span>
-          <span><Dot color="#F59E0B" /> 心情</span>
+        <div style={{ display: 'flex', gap: 'var(--space-3)', justifyContent: 'center', marginTop: 'var(--space-3)', fontFamily: 'var(--font-body)', color: 'var(--color-text-muted)' }}>
+          <LegendDot color="var(--color-primary)" label="专注" />
+          <LegendDot color="var(--color-info)" label="任务" />
+          <LegendDot color="var(--color-success)" label="习惯" />
+          <LegendDot color="#EC4899" label="日记" />
+          <LegendDot color="var(--color-warning)" label="心情" />
         </div>
       </div>
 
       {/* ===== 选中日期汇总 ===== */}
       <div>
-        <h2 style={{ fontSize: 17, fontWeight: 700, color: '#1C1917', margin: '0 0 12px' }}>
+        <h2
+          className="heading-2"
+          style={{
+            fontFamily: 'var(--font-display)',
+            color: 'var(--color-text)',
+            margin: '0 0 var(--space-4)',
+          }}
+        >
           📅 {selectedDate}
           {selectedDate === `${today.getFullYear()}-${pad(today.getMonth() + 1)}-${pad(today.getDate())}` && ' (今天)'}
         </h2>
@@ -197,7 +267,7 @@ export default function CalendarPage() {
         {!selectedActivity || (selectedActivity.focus === 0 && selectedActivity.tasks === 0 && selectedActivity.habits === 0 && !selectedActivity.journal && !selectedActivity.mood) ? (
           <EmptyDay />
         ) : (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-4)' }}>
             {/* 时间线 */}
             {selectedFocus.length > 0 && (
               <TimelineView sessions={selectedFocus} />
@@ -205,21 +275,41 @@ export default function CalendarPage() {
 
             {/* 心情 */}
             {selectedMood && (
-              <DayCard emoji="😊" title="心情" color="#F59E0B">
-                <span style={{ fontSize: 32 }}>{selectedMood}</span>
+              <DayCard emoji="😊" title="心情" accentColor="var(--color-primary)">
+                <span style={{ fontSize: 36 }}>{selectedMood}</span>
               </DayCard>
             )}
 
             {/* 专注 */}
             {selectedFocus.length > 0 && (
-              <DayCard emoji="🎯" title="专注记录" color="#7C3AED">
+              <DayCard emoji="🎯" title="专注记录" accentColor="var(--color-primary)">
                 {selectedFocus.map((s) => (
-                  <div key={s.id} style={{ display: 'flex', justifyContent: 'space-between', padding: '4px 0', fontSize: 13, color: '#44403C' }}>
+                  <div
+                    key={s.id}
+                    style={{
+                      display: 'flex',
+                      justifyContent: 'space-between',
+                      padding: 'var(--space-1) 0',
+                      fontFamily: 'var(--font-body)',
+                      fontSize: 13,
+                      color: 'var(--color-text)',
+                    }}
+                  >
                     <span>{s.taskTitle || '自由专注'}</span>
-                    <span style={{ color: '#7C3AED', fontWeight: 600 }}>{s.durationMinutes}分钟</span>
+                    <span style={{ color: 'var(--color-primary)', fontWeight: 600 }}>
+                      {s.durationMinutes}分钟
+                    </span>
                   </div>
                 ))}
-                <div style={{ fontSize: 12, color: '#7C3AED', fontWeight: 600, marginTop: 4 }}>
+                <div
+                  className="body-small"
+                  style={{
+                    fontFamily: 'var(--font-body)',
+                    color: 'var(--color-primary)',
+                    fontWeight: 600,
+                    marginTop: 'var(--space-1)',
+                  }}
+                >
                   合计: {selectedFocus.reduce((s, x) => s + x.durationMinutes, 0)}分钟 · {selectedFocus.filter((s) => s.sessionType === 'pomodoro').length}个番茄
                 </div>
               </DayCard>
@@ -227,13 +317,34 @@ export default function CalendarPage() {
 
             {/* 任务 */}
             {selectedTasks.length > 0 && (
-              <DayCard emoji="✅" title="任务活动" color="#3B82F6">
+              <DayCard emoji="✅" title="任务活动" accentColor="var(--color-info)">
                 {selectedTasks.map((t) => (
-                  <div key={t.id} style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '3px 0', fontSize: 13 }}>
-                    <span style={{ color: t.status === 'done' ? '#10B981' : '#3B82F6', fontSize: 12 }}>
+                  <div
+                    key={t.id}
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: 'var(--space-2)',
+                      padding: 'var(--space-1) 0',
+                      fontFamily: 'var(--font-body)',
+                      fontSize: 13,
+                    }}
+                  >
+                    <span
+                      style={{
+                        color: t.status === 'done' ? 'var(--color-success)' : 'var(--color-info)',
+                        fontSize: 12,
+                      }}
+                    >
                       {t.status === 'done' ? '✓' : '○'}
                     </span>
-                    <span style={{ flex: 1, color: t.status === 'done' ? '#78716C' : '#292524', textDecoration: t.status === 'done' ? 'line-through' : undefined }}>
+                    <span
+                      style={{
+                        flex: 1,
+                        color: t.status === 'done' ? 'var(--color-text-secondary)' : 'var(--color-text)',
+                        textDecoration: t.status === 'done' ? 'line-through' : undefined,
+                      }}
+                    >
                       {t.title}
                     </span>
                   </div>
@@ -243,12 +354,23 @@ export default function CalendarPage() {
 
             {/* 习惯 */}
             {selectedHabits.length > 0 && (
-              <DayCard emoji="🔥" title="习惯打卡" color="#10B981">
-                <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+              <DayCard emoji="🔥" title="习惯打卡" accentColor="var(--color-success)">
+                <div style={{ display: 'flex', gap: 'var(--space-2)', flexWrap: 'wrap' }}>
                   {selectedHabits.map((l) => {
                     const h = habits.find((x) => x.id === l.habitId);
                     return h ? (
-                      <span key={l.habitId} style={{ fontSize: 13, padding: '3px 10px', borderRadius: 8, backgroundColor: '#D1FAE5', color: '#065F46' }}>
+                      <span
+                        key={l.habitId}
+                        style={{
+                          fontFamily: 'var(--font-body)',
+                          fontSize: 13,
+                          padding: 'var(--space-1) var(--space-3)',
+                          borderRadius: 'var(--radius-sm)',
+                          backgroundColor: 'var(--color-success)',
+                          color: 'var(--color-bg)',
+                          opacity: 0.85,
+                        }}
+                      >
                         {h.icon} {h.name}
                       </span>
                     ) : null;
@@ -259,8 +381,17 @@ export default function CalendarPage() {
 
             {/* 日记 */}
             {selectedJournal && (
-              <DayCard emoji="📝" title="日记" color="#EC4899">
-                <div style={{ fontSize: 13, color: '#44403C', lineHeight: 1.6, maxHeight: 120, overflow: 'hidden' }}>
+              <DayCard emoji="📝" title="日记" accentColor="#EC4899">
+                <div
+                  style={{
+                    fontFamily: 'var(--font-body)',
+                    fontSize: 13,
+                    color: 'var(--color-text)',
+                    lineHeight: 1.7,
+                    maxHeight: 120,
+                    overflow: 'hidden',
+                  }}
+                >
                   {selectedJournal.content.slice(0, 200)}
                   {selectedJournal.content.length > 200 && '...'}
                 </div>
@@ -276,19 +407,87 @@ export default function CalendarPage() {
 /* ===== 子组件 ===== */
 
 function Dot({ color }: { color: string }) {
-  return <span style={{ display: 'inline-block', width: 6, height: 6, borderRadius: '50%', backgroundColor: color, verticalAlign: 'middle', marginRight: 2 }} />;
+  return (
+    <span
+      style={{
+        display: 'inline-block',
+        width: 5,
+        height: 5,
+        borderRadius: 'var(--radius-full)',
+        backgroundColor: color,
+      }}
+    />
+  );
 }
 
-function DayCard({ emoji, title, color, children }: { emoji: string; title: string; color: string; children: React.ReactNode }) {
+function LegendDot({ color, label }: { color: string; label: string }) {
   return (
-    <div style={{ backgroundColor: '#FFF', borderRadius: 14, padding: '14px 16px', border: '1.5px solid #E7E5E4', borderLeft: `3px solid ${color}` }}>
-      <p style={{ fontSize: 13, fontWeight: 600, color, margin: '0 0 8px' }}>{emoji} {title}</p>
+    <span
+      className="caption"
+      style={{
+        display: 'flex',
+        alignItems: 'center',
+        gap: 'var(--space-1)',
+        fontFamily: 'var(--font-body)',
+        color: 'var(--color-text-muted)',
+      }}
+    >
+      <Dot color={color} /> {label}
+    </span>
+  );
+}
+
+function DayCard({
+  emoji,
+  title,
+  accentColor,
+  children,
+}: {
+  emoji: string;
+  title: string;
+  accentColor: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <div
+      style={{
+        backgroundColor: 'var(--color-surface)',
+        borderRadius: 'var(--radius-lg)',
+        padding: 'var(--space-4)',
+        border: '1px solid var(--color-divider)',
+        borderLeft: `3px solid ${accentColor}`,
+      }}
+    >
+      <p
+        className="label-text"
+        style={{
+          fontFamily: 'var(--font-body)',
+          fontWeight: 600,
+          color: accentColor,
+          margin: '0 0 var(--space-2)',
+          textTransform: 'uppercase',
+          letterSpacing: '0.03em',
+        }}
+      >
+        {emoji} {title}
+      </p>
       {children}
     </div>
   );
 }
 
-function TimelineView({ sessions }: { sessions: { id: string; taskTitle: string | null; startedAt: string; endedAt: string | null; durationMinutes: number; sessionType: string }[] }) {
+function TimelineView({
+  sessions,
+}: {
+  sessions: {
+    id: string;
+    taskTitle: string | null;
+    startedAt: string;
+    endedAt: string | null;
+    durationMinutes: number;
+    sessionType: string;
+  }[];
+}) {
   const sorted = [...sessions].sort((a, b) => a.startedAt.localeCompare(b.startedAt));
 
   const getTop = (iso: string) => {
@@ -297,12 +496,43 @@ function TimelineView({ sessions }: { sessions: { id: string; taskTitle: string 
   };
 
   return (
-    <DayCard emoji="⏱️" title="今日时间线" color="#6366F1">
-      <div style={{ position: 'relative', height: 200, backgroundColor: '#FAFAF9', borderRadius: 10, overflow: 'hidden', border: '1px solid #F5F5F4' }}>
+    <DayCard emoji="⏱️" title="今日时间线" accentColor="#6366F1">
+      <div
+        style={{
+          position: 'relative',
+          height: 200,
+          backgroundColor: 'var(--color-bg)',
+          borderRadius: 'var(--radius-md)',
+          overflow: 'hidden',
+          border: '1px solid var(--color-divider)',
+        }}
+      >
         {/* 小时刻度 */}
         {[0, 6, 12, 18].map((h) => (
-          <div key={h} style={{ position: 'absolute', top: `${(h / 24) * 100}%`, left: 0, right: 0, borderTop: '1px dashed #E7E5E4' }}>
-            <span style={{ position: 'absolute', left: 2, top: -8, fontSize: 9, color: '#A8A29E', backgroundColor: '#FAFAF9', padding: '0 2px' }}>{String(h).padStart(2, '0')}:00</span>
+          <div
+            key={h}
+            style={{
+              position: 'absolute',
+              top: `${(h / 24) * 100}%`,
+              left: 0,
+              right: 0,
+              borderTop: '1px dashed var(--color-divider)',
+            }}
+          >
+            <span
+              className="caption"
+              style={{
+                position: 'absolute',
+                left: 2,
+                top: -8,
+                fontFamily: 'var(--font-body)',
+                color: 'var(--color-text-muted)',
+                backgroundColor: 'var(--color-bg)',
+                padding: '0 2px',
+              }}
+            >
+              {String(h).padStart(2, '0')}:00
+            </span>
           </div>
         ))}
 
@@ -310,17 +540,36 @@ function TimelineView({ sessions }: { sessions: { id: string; taskTitle: string 
         {sorted.map((s) => {
           const top = getTop(s.startedAt);
           const height = Math.max((s.durationMinutes / (24 * 60)) * 100, 2);
-          const color = s.sessionType === 'break' ? '#10B981' : s.sessionType === 'pomodoro' ? '#7C3AED' : '#6366F1';
+          const color =
+            s.sessionType === 'break'
+              ? 'var(--color-success)'
+              : s.sessionType === 'pomodoro'
+                ? 'var(--color-primary)'
+                : '#6366F1';
           return (
-            <div key={s.id}
+            <div
+              key={s.id}
               title={`${s.taskTitle || '自由专注'} · ${s.durationMinutes}分钟`}
               style={{
-                position: 'absolute', left: 30, right: 4, top: `${top}%`, height: `${height}%`,
-                backgroundColor: color + '30', borderLeft: `3px solid ${color}`,
-                borderRadius: '0 6px 6px 0', display: 'flex', alignItems: 'center',
-                padding: '0 8px', fontSize: 11, color, fontWeight: 600,
-                overflow: 'hidden', whiteSpace: 'nowrap',
-              }}>
+                position: 'absolute',
+                left: 30,
+                right: 4,
+                top: `${top}%`,
+                height: `${height}%`,
+                backgroundColor: `${color}30`,
+                borderLeft: `3px solid ${color}`,
+                borderRadius: 'var(--radius-sm)',
+                display: 'flex',
+                alignItems: 'center',
+                padding: '0 var(--space-2)',
+                fontFamily: 'var(--font-body)',
+                fontSize: 11,
+                color: color,
+                fontWeight: 600,
+                overflow: 'hidden',
+                whiteSpace: 'nowrap',
+              }}
+            >
               {s.taskTitle || '自由专注'} · {s.durationMinutes}分
             </div>
           );
@@ -332,16 +581,50 @@ function TimelineView({ sessions }: { sessions: { id: string; taskTitle: string 
 
 function EmptyDay() {
   return (
-    <div style={{ textAlign: 'center', padding: '40px 20px', color: '#A8A29E' }}>
-      <p style={{ fontSize: 40, margin: '0 0 8px' }}>📭</p>
-      <p style={{ fontSize: 15, margin: 0 }}>这一天没有记录</p>
-      <p style={{ fontSize: 13, margin: '4px 0 0' }}>开始专注、完成任务或写日记都会出现在这里</p>
+    <div
+      style={{
+        textAlign: 'center',
+        padding: 'var(--space-12) var(--space-6)',
+        color: 'var(--color-text-muted)',
+      }}
+    >
+      <p style={{ fontSize: 44, margin: '0 0 var(--space-2)', lineHeight: 1 }}>📭</p>
+      <p
+        className="heading-3"
+        style={{
+          fontFamily: 'var(--font-display)',
+          color: 'var(--color-text)',
+          margin: '0 0 var(--space-1)',
+        }}
+      >
+        这一天没有记录
+      </p>
+      <p
+        className="body-small"
+        style={{
+          fontFamily: 'var(--font-body)',
+          color: 'var(--color-text-muted)',
+          margin: 0,
+        }}
+      >
+        开始专注、完成任务或写日记都会出现在这里
+      </p>
     </div>
   );
 }
 
 const navBtnStyle: React.CSSProperties = {
-  width: 34, height: 34, borderRadius: '50%', border: '1.5px solid #E7E5E4',
-  backgroundColor: '#FFF', fontSize: 14, cursor: 'pointer',
-  display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#78716C',
+  width: 36,
+  height: 36,
+  borderRadius: 'var(--radius-full)',
+  border: '1px solid var(--color-border)',
+  backgroundColor: 'transparent',
+  fontFamily: 'var(--font-body)',
+  fontSize: 14,
+  cursor: 'pointer',
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+  color: 'var(--color-text-secondary)',
+  transition: 'var(--transition-fast)',
 };
