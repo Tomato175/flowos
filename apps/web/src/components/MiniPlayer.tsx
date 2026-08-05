@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useRef } from 'react';
-import { useAudioStore, AMBIENT_SOUNDS, type CustomTrack } from '@/stores/useAudioStore';
+import { useAudioStore, AMBIENT_SOUNDS } from '@/stores/useAudioStore';
 import { playAmbient, setAmbientVolume, stopAmbient } from '@/lib/audio-engine';
 import { createClient } from '@/lib/supabase';
 import { useAuth } from '@/lib/auth-context';
