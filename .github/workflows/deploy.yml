@@ -15,22 +15,21 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Setup Node.js
+      - name: Setup Node
         uses: actions/setup-node@v4
         with:
           node-version: '22'
 
-      - name: Build and Deploy
+      - name: Install deps
+        run: npm install
         env:
           NEXT_PUBLIC_SUPABASE_URL: https://zfoohytzfegynnypwtjs.supabase.co
           NEXT_PUBLIC_SUPABASE_ANON_KEY: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inpmb29oeXR6ZmVneW5ueXB3dGpzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODU4MjAzMzMsImV4cCI6MjEwMTM5NjMzM30.6EXoc8dS-iaxYc7t8VTOMpK59ZV1hDLEQ3hv_qb9gVI
-        run: |
-          cd apps/web
-          npm install
-          npm run build
-          touch out/.nojekyll
 
-      - name: Deploy to GitHub Pages
+      - name: Build
+        run: cd apps/web && npm run build && touch out/.nojekyll
+
+      - name: Deploy
         uses: JamesIves/github-pages-deploy-action@v4
         with:
           folder: apps/web/out
