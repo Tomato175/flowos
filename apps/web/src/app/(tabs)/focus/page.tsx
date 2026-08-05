@@ -144,7 +144,7 @@ export default function FocusPage() {
             color={accentColor}
             soundEmoji={activeSound ? AMBIENT_SOUNDS.find((s) => s.id === activeSound)?.emoji : '🎵'}
             isPlaying={!!(activeSound && isPlaying)}
-            soundLabel={activeSound ? AMBIENT_SOUNDS.find((s) => s.id === activeSound)?.label : '选择氛围音'}
+            soundLabel={activeSound ? (AMBIENT_SOUNDS.find((s) => s.id === activeSound)?.label ?? '选择氛围音') : '选择氛围音'}
           />
         </div>
 
