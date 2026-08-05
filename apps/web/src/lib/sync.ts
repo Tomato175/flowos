@@ -1,9 +1,13 @@
 'use client';
 
 import { createClient } from './supabase';
+import type { Note } from '@/stores/useNoteStore';
+import type { Task } from '@/stores/useTaskStore';
+import type { Objective } from '@/stores/useGoalStore';
+import type { FocusSession } from '@/stores/useFocusStore';
 
 /**
- * 检查 Supabase 是否可用（表是否存在）
+ * 检查 Supabase 是否可用
  */
 export async function isSupabaseReady(): Promise<boolean> {
   try {
@@ -13,6 +17,95 @@ export async function isSupabaseReady(): Promise<boolean> {
   } catch {
     return false;
   }
+}
+
+/**
+ * 从 Supabase 加载所有数据到本地 stores
+ * 在每次登录时调用
+ */
+export async function loadFromCloud(userId: string) {
+  const supabase = createClient();
+
+  // 并行加载
+  const [tasksResult, notesResult, goalsResult, focusResult, habitsResult, habitLogsResult] = await Promise.all([
+    supabase.from('tasks').select('*').eq('user_id', userId),
+    supabase.from('notes').select('*').eq('user_id', userId),
+    supabase.from('objectives').select('*, key_results(*)').eq('user_id', userId),
+    supabase.from('focus_sessions').select('*').eq('user_id', userId).order('started_at', { ascending: false }).limit(50),
+    supabase.from('habits').select('*').eq('user_id', userId),
+    supabase.from('habit_logs').select('*').eq('user_id', userId),
+  ]);
+
+  // Hydrate tasks
+  if (tasksResult.data) {
+    const { useTaskStore } = await import('@/stores/useTaskStore');
+    const tasks: Task[] = tasksResult.data.map((t: any) => ({
+      id: t.id, title: t.title, description: t.description || '',
+      status: t.status, priority: t.priority, dueDate: t.due_date,
+      estimatedMinutes: t.estimated_minutes, projectId: t.project_id,
+      tags: t.tags || [], isRecurring: t.is_recurring || false,
+      createdAt: t.created_at, updatedAt: t.updated_at,
+    }));
+    useTaskStore.getState().hydrateFromCloud(tasks);
+  }
+
+  // Hydrate notes
+  if (notesResult.data) {
+    const { useNoteStore } = await import('@/stores/useNoteStore');
+    const notes: Note[] = notesResult.data.map((n: any) => ({
+      id: n.id, title: n.title, content: n.content || '',
+      noteType: n.note_type || 'note', journalDate: n.journal_date,
+      tags: n.tags || [], isPinned: n.is_pinned || false,
+      isArchived: n.is_archived || false,
+      createdAt: n.created_at, updatedAt: n.updated_at,
+    }));
+    useNoteStore.getState().hydrateFromCloud(notes);
+  }
+
+  // Hydrate goals
+  if (goalsResult.data) {
+    const { useGoalStore } = await import('@/stores/useGoalStore');
+    const objectives: Objective[] = goalsResult.data.map((o: any) => ({
+      id: o.id, title: o.title, description: o.description || '',
+      timePeriod: o.time_period || '2026-Q3', color: o.color || '#7C3AED',
+      status: o.status || 'active',
+      keyResults: (o.key_results || []).map((kr: any) => ({
+        id: kr.id, title: kr.title,
+        targetValue: kr.target_value, currentValue: kr.current_value,
+        unit: kr.unit || '%', taskIds: kr.task_ids || [],
+      })),
+    }));
+    useGoalStore.getState().hydrateFromCloud(objectives);
+  }
+
+  // Hydrate focus sessions
+  if (focusResult.data) {
+    const { useFocusStore } = await import('@/stores/useFocusStore');
+    const sessions: FocusSession[] = focusResult.data.map((s: any) => ({
+      id: s.id, taskId: s.task_id, taskTitle: s.task_title,
+      startedAt: s.started_at, endedAt: s.ended_at,
+      durationMinutes: s.duration_minutes, sessionType: s.session_type,
+      pomodoroCycle: s.pomodoro_cycle, completed: s.completed,
+    }));
+    useFocusStore.getState().hydrateSessions(sessions);
+  }
+
+  // Hydrate habits
+  if (habitsResult.data) {
+    const { useHabitStore } = await import('@/stores/useHabitStore');
+    useHabitStore.getState().hydrateFromCloud(
+      habitsResult.data.map((h: any) => ({
+        id: h.id, name: h.name, icon: h.icon, color: h.color,
+        frequencyType: h.frequency_type, frequencyCount: h.frequency_count,
+        reminderTime: h.reminder_time, isArchived: h.is_archived || false,
+      })),
+      (habitLogsResult.data || []).map((l: any) => ({
+        habitId: l.habit_id, date: l.logged_date, completed: l.completed,
+      })),
+    );
+  }
+
+  console.log('✅ 数据已从 Supabase 同步');
 }
 
 /**

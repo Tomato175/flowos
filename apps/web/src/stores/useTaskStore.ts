@@ -42,6 +42,9 @@ interface TaskStore {
   addProject: (project: Omit<Project, 'id'>) => void;
   updateProject: (id: string, updates: Partial<Project>) => void;
   deleteProject: (id: string) => void;
+
+  // 云端恢复
+  hydrateFromCloud: (tasks: Task[]) => void;
 }
 
 function generateId(): string {
@@ -109,6 +112,8 @@ export const useTaskStore = create<TaskStore>()(
             t.projectId === id ? { ...t, projectId: null } : t,
           ),
         })),
+
+      hydrateFromCloud: (cloudTasks) => set({ tasks: cloudTasks }),
     }),
     { name: 'flowos-tasks' },
   ),

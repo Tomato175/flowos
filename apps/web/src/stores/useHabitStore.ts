@@ -37,6 +37,7 @@ interface HabitStore {
   getStreak: (habitId: string) => number;
   getCompletionRate: (habitId: string, days: number) => number;
   getActiveHabits: () => Habit[];
+  hydrateFromCloud: (habits: Habit[], logs: HabitLog[]) => void;
 }
 
 function generateId() { return Date.now().toString(36) + Math.random().toString(36).slice(2, 7); }
@@ -103,6 +104,8 @@ export const useHabitStore = create<HabitStore>()(
       },
 
       getActiveHabits: () => get().habits.filter((h) => !h.isArchived),
+
+      hydrateFromCloud: (cloudHabits, cloudLogs) => set({ habits: cloudHabits, logs: cloudLogs }),
     }),
     { name: 'flowos-habits' },
   ),

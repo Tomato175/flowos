@@ -52,6 +52,7 @@ interface FocusStore {
   addSession: (session: FocusSession) => void;
   getTodayStats: () => { sessions: number; minutes: number; pomodoros: number };
   getWeekStats: () => { sessions: number; minutes: number; pomodoros: number; days: number };
+  hydrateSessions: (sessions: FocusSession[]) => void;
 }
 
 function generateId(): string {
@@ -176,6 +177,8 @@ export const useFocusStore = create<FocusStore>()(
           days: uniqueDays,
         };
       },
+
+      hydrateSessions: (cloudSessions) => set({ sessions: cloudSessions }),
     }),
     { name: 'flowos-focus' },
   ),

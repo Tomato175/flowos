@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/lib/auth-context';
-import { isSupabaseReady, migrateFromLocal } from '@/lib/sync';
+import { isSupabaseReady, migrateFromLocal, loadFromCloud } from '@/lib/sync';
 import { createClient } from '@/lib/supabase';
 import { useAudioStore } from '@/stores/useAudioStore';
 
@@ -27,8 +27,10 @@ export default function HomePage() {
       isSupabaseReady()
         .then((ready) => {
           if (ready) {
-            migrateFromLocal(user.id).then(redirect).catch(redirect);
+            migrateFromLocal(user.id);
+            loadFromCloud(user.id);
             syncFromCloud(user.id);
+            setTimeout(redirect, 1000);
           }
           else redirect();
         })

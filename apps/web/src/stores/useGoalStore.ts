@@ -39,6 +39,7 @@ interface GoalStore {
 
   getOverallProgress: (objectiveId: string) => number;
   getActiveObjectives: () => Objective[];
+  hydrateFromCloud: (objectives: Objective[]) => void;
 }
 
 function genId() { return Date.now().toString(36) + Math.random().toString(36).slice(2, 7); }
@@ -112,6 +113,8 @@ export const useGoalStore = create<GoalStore>()(
       },
 
       getActiveObjectives: () => get().objectives.filter((o) => o.status === 'active'),
+
+      hydrateFromCloud: (cloudObjectives) => set({ objectives: cloudObjectives }),
     }),
     { name: 'flowos-goals' },
   ),

@@ -25,7 +25,8 @@ interface NoteStore {
   archiveNote: (id: string) => void;
   getJournal: (date: string) => Note | undefined;
   searchNotes: (q: string) => Note[];
-  parseLinks: (content: string) => string[]; // 提取 [[链接]]
+  parseLinks: (content: string) => string[];
+  hydrateFromCloud: (notes: Note[]) => void;
 }
 
 function generateId() { return Date.now().toString(36) + Math.random().toString(36).slice(2, 7); }
@@ -68,6 +69,8 @@ export const useNoteStore = create<NoteStore>()(
         const matches = content.matchAll(/\[\[(.+?)\]\]/g);
         return [...matches].map((m) => m[1]!);
       },
+
+      hydrateFromCloud: (cloudNotes) => set({ notes: cloudNotes }),
     }),
     { name: 'flowos-notes' },
   ),
