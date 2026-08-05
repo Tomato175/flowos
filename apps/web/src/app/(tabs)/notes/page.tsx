@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { useNoteStore, type Note } from '@/stores/useNoteStore';
 import { useTaskStore } from '@/stores/useTaskStore';
 
@@ -21,6 +21,10 @@ export default function NotesPage() {
   const [journalContent, setJournalContent] = useState('');
   const journal = getJournal(todayStr);
   const contentRef = useRef<HTMLTextAreaElement>(null);
+  const autoSaveRef = useRef<ReturnType<typeof setTimeout>>();
+  const [saved, setSaved] = useState(false);
+  const [toast, setToast] = useState<string | null>(null);
+  const [autoSaved, setAutoSaved] = useState(false);
 
   useEffect(() => {
     if (journal) {
@@ -30,13 +34,40 @@ export default function NotesPage() {
     }
   }, [journal]);
 
-  const saveJournal = () => {
+  // 自动保存：每30秒 + 页面关闭时
+  const doSave = useCallback(() => {
     if (!journalContent.trim()) return;
     if (journal) {
       updateNote(journal.id, { content: journalContent });
     } else {
       addNote({ title: `${todayStr} 日记`, content: journalContent, noteType: 'daily_journal', journalDate: todayStr, tags: ['日记'], isPinned: false, isArchived: false });
     }
+  }, [journalContent, journal]);
+
+  // 页面卸载时保存
+  useEffect(() => {
+    const handleBeforeUnload = () => { doSave(); };
+    window.addEventListener('beforeunload', handleBeforeUnload);
+    return () => window.removeEventListener('beforeunload', handleBeforeUnload);
+  }, [doSave]);
+
+  // 30秒自动保存
+  useEffect(() => {
+    if (!journalContent.trim()) return;
+    const timer = setTimeout(() => {
+      doSave();
+      setAutoSaved(true);
+      setTimeout(() => setAutoSaved(false), 2000);
+    }, 30000);
+    return () => clearTimeout(timer);
+  }, [journalContent]);
+
+  const saveJournal = () => {
+    if (!journalContent.trim()) return;
+    doSave();
+    setSaved(true);
+    setToast('✅ 保存成功！可在「📔 今日日记」或「📝 笔记本」查看');
+    setTimeout(() => { setToast(null); setSaved(false); }, 3000);
   };
 
   // 笔记列表
@@ -81,16 +112,34 @@ export default function NotesPage() {
           />
 
           {/* 操作栏 */}
-          <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 10 }}>
-            <button onClick={saveJournal}
-              style={{ padding: '10px 24px', fontSize: 14, fontWeight: 600, color: '#FFF', backgroundColor: '#7C3AED', border: 'none', borderRadius: 10, cursor: 'pointer' }}>
-              💾 保存日记
-            </button>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 10, flexWrap: 'wrap', gap: 8 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+              <button onClick={saveJournal}
+                style={{ padding: '10px 24px', fontSize: 14, fontWeight: 600, color: '#FFF', backgroundColor: saved ? '#10B981' : '#7C3AED', border: 'none', borderRadius: 10, cursor: 'pointer', transition: 'background 200ms' }}>
+                {saved ? '✅ 已保存' : '💾 保存日记'}
+              </button>
+              {autoSaved && (
+                <span style={{ fontSize: 11, color: '#10B981', animation: 'fadeOut 2s' }}>已自动保存</span>
+              )}
+            </div>
             <div style={{ display: 'flex', gap: 6 }}>
               <button onClick={() => setJournalContent(JOURNAL_TEMPLATES[0]!.template)}
                 style={miniBtnStyle}>清空</button>
             </div>
           </div>
+
+          {/* Toast 提示 */}
+          {toast && (
+            <div style={{
+              position: 'fixed', bottom: 100, left: '50%', transform: 'translateX(-50%)',
+              padding: '10px 20px', fontSize: 13, borderRadius: 10,
+              backgroundColor: '#1C1917', color: '#FFF', zIndex: 200,
+              boxShadow: '0 4px 16px rgba(0,0,0,0.2)', whiteSpace: 'nowrap',
+              animation: 'fadeIn 0.3s ease',
+            }}>
+              {toast}
+            </div>
+          )}
         </div>
       )}
 

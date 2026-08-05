@@ -59,7 +59,7 @@ export default function FocusPage() {
     getTodayStats, workDuration, breakDuration,
   } = useFocusStore();
 
-  const { activeSound, setActiveSound } = useAudioStore();
+  const { activeSound, setActiveSound, volume, setVolume, isPlaying } = useAudioStore();
 
   const { tasks } = useTaskStore();
   const stats = getTodayStats();
@@ -173,19 +173,57 @@ export default function FocusPage() {
 
         {/* 氛围音 */}
         <Card>
-          <CardTitle>🎶 氛围音</CardTitle>
-          <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
-            {SOUNDS.map((s) => (
-              <button
-                key={s.id}
-                onClick={() => setActiveSound(activeSound === s.id ? null : s.id)}
-                style={soundBtnStyle(activeSound === s.id)}
-              >
-                <span style={{ fontSize: 22 }}>{s.emoji}</span>
-                <span style={{ fontSize: 10, color: '#78716C', marginTop: 2 }}>{s.label}</span>
-              </button>
-            ))}
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
+            <CardTitle>🎶 氛围音</CardTitle>
+            {activeSound && (
+              <span style={{ fontSize: 11, color: '#7C3AED', backgroundColor: '#EDE9FE', padding: '2px 8px', borderRadius: 8 }}>
+                {SOUNDS.find(s => s.id === activeSound)?.emoji} {SOUNDS.find(s => s.id === activeSound)?.label} 播放中
+              </span>
+            )}
           </div>
+          <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+            {SOUNDS.map((s) => {
+              const isActive = activeSound === s.id;
+              return (
+                <button
+                  key={s.id}
+                  onClick={() => setActiveSound(isActive ? null : s.id)}
+                  style={{
+                    display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4,
+                    padding: '14px 16px', borderRadius: 14, cursor: 'pointer', transition: 'all 200ms ease',
+                    border: `2px solid ${isActive ? '#7C3AED' : 'transparent'}`,
+                    backgroundColor: isActive ? '#EDE9FE' : '#FAFAF9',
+                    boxShadow: isActive ? '0 0 12px rgba(124,58,237,0.25)' : '0 1px 3px rgba(0,0,0,0.06)',
+                    transform: isActive ? 'scale(1.05)' : 'scale(1)',
+                    minWidth: 80,
+                  }}
+                >
+                  <span style={{ fontSize: 28, filter: isActive ? 'none' : 'grayscale(0.3)', transition: 'filter 200ms' }}>
+                    {s.emoji}
+                  </span>
+                  <span style={{ fontSize: 11, color: isActive ? '#5B21B6' : '#78716C', fontWeight: isActive ? 600 : 400 }}>
+                    {s.label}
+                  </span>
+                  {isActive && (
+                    <span style={{ fontSize: 9, color: '#7C3AED', opacity: 0.8 }}>● 播放</span>
+                  )}
+                </button>
+              );
+            })}
+          </div>
+          {activeSound && (
+            <div style={{ marginTop: 12, display: 'flex', alignItems: 'center', gap: 8 }}>
+              <span style={{ fontSize: 12, color: '#78716C' }}>🔊</span>
+              <input
+                type="range" min={0} max={1} step={0.05} value={volume}
+                onChange={(e) => setVolume(Number(e.target.value))}
+                style={{ flex: 1, accentColor: '#7C3AED', height: 4 }}
+              />
+              <span style={{ fontSize: 11, color: '#A8A29E', minWidth: 32, textAlign: 'right' }}>
+                {Math.round(volume * 100)}%
+              </span>
+            </div>
+          )}
         </Card>
 
         {/* 今日统计 */}
@@ -252,13 +290,6 @@ const selectStyle: React.CSSProperties = {
   width: '100%', padding: '8px 12px', fontSize: 14, borderRadius: 8,
   border: '1.5px solid #E7E5E4', color: '#292524', backgroundColor: '#FFF',
 };
-
-const soundBtnStyle = (active: boolean): React.CSSProperties => ({
-  display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 2,
-  padding: '10px 14px', fontSize: 20, borderRadius: 12, cursor: 'pointer', transition: 'all 150ms ease',
-  border: `2px solid ${active ? '#7C3AED' : '#E7E5E4'}`,
-  backgroundColor: active ? '#EDE9FE' : '#FFF',
-});
 
 const statValStyle: React.CSSProperties = { fontSize: 18, fontWeight: 700, color: '#1C1917', margin: '0 0 2px' };
 const statLblStyle: React.CSSProperties = { fontSize: 11, color: '#A8A29E', margin: 0 };
