@@ -21,7 +21,6 @@ export default function NotesPage() {
   const [journalContent, setJournalContent] = useState('');
   const journal = getJournal(todayStr);
   const contentRef = useRef<HTMLTextAreaElement>(null);
-  const autoSaveRef = useRef<ReturnType<typeof setTimeout>>();
   const [saved, setSaved] = useState(false);
   const [toast, setToast] = useState<string | null>(null);
   const [autoSaved, setAutoSaved] = useState(false);
