@@ -142,7 +142,7 @@ export default function FocusPage() {
         <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 32 }}>
           <VinylDisc
             color={accentColor}
-            soundEmoji={activeSound ? AMBIENT_SOUNDS.find((s) => s.id === activeSound)?.emoji : '🎵'}
+            soundEmoji={activeSound ? (AMBIENT_SOUNDS.find((s) => s.id === activeSound)?.emoji ?? '🎵') : '🎵'}
             isPlaying={!!(activeSound && isPlaying)}
             soundLabel={activeSound ? (AMBIENT_SOUNDS.find((s) => s.id === activeSound)?.label ?? '选择氛围音') : '选择氛围音'}
           />
@@ -151,7 +151,7 @@ export default function FocusPage() {
         {/* 当前曲目信息 */}
         <div style={{ textAlign: 'center', marginBottom: 24 }}>
           <p style={{ fontSize: 22, fontWeight: 700, margin: '0 0 6px' }}>
-            {activeSound ? AMBIENT_SOUNDS.find((s) => s.id === activeSound)?.label : '未选择氛围音'}
+            {activeSound ? (AMBIENT_SOUNDS.find((s) => s.id === activeSound)?.label ?? '未选择氛围音') : '未选择氛围音'}
           </p>
           <p style={{ fontSize: 12, color: 'rgba(255,255,255,0.5)', margin: 0 }}>
             {activeSound
