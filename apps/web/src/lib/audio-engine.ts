@@ -10,6 +10,9 @@ let activeNodes: AudioNode[] = [];
 let masterGain: GainNode | null = null;
 let intervalIds: ReturnType<typeof setInterval>[] = [];
 let customAudioEl: HTMLAudioElement | null = null;
+let onEndedCallback: (() => void) | null = null;
+
+export function onTrackEnd(cb: (() => void) | null) { onEndedCallback = cb; }
 
 function ctx(): AudioContext {
   if (!audioCtx || audioCtx.state === 'closed') {
@@ -37,9 +40,10 @@ export function playAmbient(soundId: string, volume: number) {
 
   if (isUrl) {
     customAudioEl = new Audio(soundId);
-    customAudioEl.loop = true;
+    customAudioEl.loop = false;
     customAudioEl.volume = masterGain.gain.value;
     customAudioEl.play().catch(() => {});
+    customAudioEl.addEventListener('ended', () => { if (onEndedCallback) onEndedCallback(); });
     try {
       const src = c.createMediaElementSource(customAudioEl);
       src.connect(masterGain);

@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { useFocusStore } from '@/stores/useFocusStore';
 import { useTaskStore } from '@/stores/useTaskStore';
 import { useAudioStore, AMBIENT_SOUNDS } from '@/stores/useAudioStore';
+import { onTrackEnd } from '@/lib/audio-engine';
 import { useTimer } from '@/hooks/useTimer';
 
 /* ---- 音效 Web Audio ---- */
@@ -50,9 +51,35 @@ export default function FocusPage() {
     getTodayStats, workDuration, breakDuration,
   } = useFocusStore();
 
-  const { activeSound, setActiveSound, volume, setVolume, isPlaying } = useAudioStore();
+  const { activeSound, setActiveSound, volume, setVolume, isPlaying, customTracks } = useAudioStore();
   const { tasks } = useTaskStore();
   const stats = getTodayStats();
+
+  /* 统一音轨列表：内置 + 自定义 */
+  type UnifiedSound = { id: string; label: string; emoji: string; kind: 'builtin' | 'custom' };
+  const allSounds: UnifiedSound[] = [
+    ...AMBIENT_SOUNDS.map((s) => ({ ...s, kind: 'builtin' }) as UnifiedSound),
+    ...customTracks.map((t) => ({ id: t.id, label: t.name, emoji: '🎵', kind: 'custom' }) as UnifiedSound),
+  ];
+  const currentSound = allSounds.find((s) => s.id === activeSound);
+  const currentIdx = activeSound ? allSounds.findIndex((s) => s.id === activeSound) : -1;
+
+  const playPrev = () => {
+    if (allSounds.length === 0) return;
+    const idx = currentIdx <= 0 ? allSounds.length - 1 : currentIdx - 1;
+    setActiveSound(allSounds[idx]!.id);
+  };
+  const playNext = () => {
+    if (allSounds.length === 0) return;
+    const idx = currentIdx >= allSounds.length - 1 ? 0 : currentIdx + 1;
+    setActiveSound(allSounds[idx]!.id);
+  };
+
+  // 自定义曲目播放完成后自动播下一首
+  useEffect(() => {
+    onTrackEnd(() => { playNext(); });
+    return () => { onTrackEnd(null); };
+  }, [currentIdx]);
 
   useEffect(() => { requestNotification(); }, []);
 
@@ -78,19 +105,6 @@ export default function FocusPage() {
 
   const isBreak = sessionType === 'break';
   const accentColor = isBreak ? '#10B981' : '#7C3AED';
-
-  /* 当前氛围音的索引（用于上下首） */
-  const currentSoundIdx = activeSound
-    ? AMBIENT_SOUNDS.findIndex((s) => s.id === activeSound)
-    : 0;
-  const playPrev = () => {
-    const idx = (currentSoundIdx - 1 + AMBIENT_SOUNDS.length) % AMBIENT_SOUNDS.length;
-    setActiveSound(AMBIENT_SOUNDS[idx]!.id);
-  };
-  const playNext = () => {
-    const idx = (currentSoundIdx + 1) % AMBIENT_SOUNDS.length;
-    setActiveSound(AMBIENT_SOUNDS[idx]!.id);
-  };
 
   return (
     <div style={{
@@ -142,20 +156,20 @@ export default function FocusPage() {
         <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 32 }}>
           <VinylDisc
             color={accentColor}
-            soundEmoji={activeSound ? (AMBIENT_SOUNDS.find((s) => s.id === activeSound)?.emoji ?? '🎵') : '🎵'}
+            soundEmoji={currentSound?.emoji ?? '🎵'}
+            soundLabel={currentSound?.label ?? '选择音轨'}
             isPlaying={!!(activeSound && isPlaying)}
-            soundLabel={activeSound ? (AMBIENT_SOUNDS.find((s) => s.id === activeSound)?.label ?? '选择氛围音') : '选择氛围音'}
           />
         </div>
 
         {/* 当前曲目信息 */}
         <div style={{ textAlign: 'center', marginBottom: 24 }}>
           <p style={{ fontSize: 22, fontWeight: 700, margin: '0 0 6px' }}>
-            {activeSound ? (AMBIENT_SOUNDS.find((s) => s.id === activeSound)?.label ?? '未选择氛围音') : '未选择氛围音'}
+            {currentSound?.label ?? '未选择音轨'}
           </p>
           <p style={{ fontSize: 12, color: 'rgba(255,255,255,0.5)', margin: 0 }}>
-            {activeSound
-              ? `心流OS · ${activeSound === 'rain' ? '宁静雨夜' : activeSound === 'ocean' ? '海浪低语' : activeSound === 'forest' ? '林间鸟鸣' : '深度专注'}`
+            {currentSound
+              ? `心流OS · ${currentSound.kind === 'custom' ? '我的音乐 · ' + currentSound.label : '氛围音 · ' + currentSound.label}`
               : '从下方选择你想要的氛围'}
           </p>
         </div>
@@ -285,16 +299,16 @@ export default function FocusPage() {
           </div>
         </div>
 
-        {/* 氛围音选择（类似播放列表） */}
+        {/* 统一音轨列表 */}
         <div style={{
           background: 'rgba(255,255,255,0.08)', borderRadius: 16, padding: 16,
           backdropFilter: 'blur(10px)', border: '1px solid rgba(255,255,255,0.1)',
         }}>
           <p style={{ fontSize: 12, color: 'rgba(255,255,255,0.5)', margin: '0 0 12px', letterSpacing: 1, textTransform: 'uppercase' }}>
-            🎵 氛围音库
+            🎵 音轨库 ({allSounds.length})
           </p>
           <div style={{ display: 'flex', gap: 8, overflowX: 'auto', paddingBottom: 4, scrollbarWidth: 'none' }}>
-            {AMBIENT_SOUNDS.slice(0, 10).map((s) => {
+            {allSounds.slice(0, 15).map((s) => {
               const active = activeSound === s.id;
               return (
                 <button key={s.id} onClick={() => setActiveSound(active ? null : s.id)}
@@ -307,7 +321,9 @@ export default function FocusPage() {
                     transition: 'all 200ms ease',
                   }}>
                   <span style={{ fontSize: 22 }}>{s.emoji}</span>
-                  <span style={{ fontSize: 10, fontWeight: active ? 600 : 400 }}>{s.label}</span>
+                  <span style={{ fontSize: 10, fontWeight: active ? 600 : 400, maxWidth: 70, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                    {s.label}
+                  </span>
                 </button>
               );
             })}
