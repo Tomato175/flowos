@@ -176,8 +176,8 @@ export default function FocusPage() {
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
             <CardTitle>🎶 氛围音</CardTitle>
             {activeSound && (
-              <span style={{ fontSize: 11, color: '#7C3AED', backgroundColor: '#EDE9FE', padding: '2px 8px', borderRadius: 8 }}>
-                {SOUNDS.find(s => s.id === activeSound)?.emoji} {SOUNDS.find(s => s.id === activeSound)?.label} 播放中
+              <span style={{ fontSize: 11, color: isPlaying ? '#10B981' : '#A8A29E', backgroundColor: isPlaying ? '#D1FAE5' : '#F5F5F4', padding: '2px 8px', borderRadius: 8 }}>
+                {SOUNDS.find(s => s.id === activeSound)?.emoji} {SOUNDS.find(s => s.id === activeSound)?.label} {isPlaying ? '▶ 播放中' : '⏸ 已暂停'}
               </span>
             )}
           </div>
