@@ -43,21 +43,13 @@ export function playAmbient(soundId: string, volume: number) {
     customAudioEl.loop = false;
     customAudioEl.volume = masterGain.gain.value;
     customAudioEl.preload = 'auto';
-    const playPromise = customAudioEl.play();
-    if (playPromise) {
-      playPromise.catch((err) => {
-        console.warn('Audio play failed:', err.message);
-      });
-    }
+    customAudioEl.play().catch((err) => {
+      console.warn('Audio play failed:', err.message);
+    });
     customAudioEl.addEventListener('ended', () => { if (onEndedCallback) onEndedCallback(); });
     customAudioEl.addEventListener('error', () => {
       console.warn('Audio load error:', customAudioEl?.error?.message);
     });
-    try {
-      const src = c.createMediaElementSource(customAudioEl);
-      src.connect(masterGain);
-      activeNodes.push(src);
-    } catch {}
   } else {
     switch (soundId) {
       case 'rain': rain(c, masterGain); break;
@@ -75,8 +67,9 @@ export function playAmbient(soundId: string, volume: number) {
 }
 
 export function setAmbientVolume(v: number) {
-  if (masterGain) masterGain.gain.value = Math.min(v, 1);
-  if (customAudioEl) customAudioEl.volume = Math.min(v, 1);
+  const vol = Math.min(v, 1);
+  if (masterGain) masterGain.gain.value = vol;
+  if (customAudioEl) customAudioEl.volume = vol;
 }
 
 export function stopAmbient() { stopAll(); }
