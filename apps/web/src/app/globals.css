@@ -1,0 +1,159 @@
+/* ============================================================
+   心流OS — 全局样式系统
+   ============================================================ */
+
+:root {
+  /* 主色调 */
+  --color-primary: #7C3AED;
+  --color-primary-light: #EDE9FE;
+  --color-primary-dark: #5B21B6;
+
+  /* 语义色 */
+  --color-success: #10B981;
+  --color-warning: #F59E0B;
+  --color-error: #EF4444;
+  --color-info: #3B82F6;
+
+  /* 中性色 */
+  --color-bg: #FAFAF9;
+  --color-surface: #FFFFFF;
+  --color-border: #E7E5E4;
+  --color-border-light: #F5F5F4;
+  --color-text: #1C1917;
+  --color-text-secondary: #44403C;
+  --color-text-muted: #78716C;
+  --color-text-disabled: #A8A29E;
+
+  /* 间距 */
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 14px;
+  --radius-xl: 18px;
+  --radius-full: 9999px;
+
+  /* 阴影 */
+  --shadow-sm: 0 1px 2px rgba(0,0,0,0.04);
+  --shadow-md: 0 4px 12px rgba(0,0,0,0.06);
+  --shadow-lg: 0 8px 24px rgba(0,0,0,0.08);
+
+  /* 动效 */
+  --transition-fast: 150ms cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-normal: 250ms cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-slow: 400ms cubic-bezier(0.4, 0, 0.2, 1);
+
+  /* 字体 */
+  --font-sans: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;
+  --font-mono: 'SF Mono', 'Fira Code', 'Cascadia Code', Consolas, monospace;
+}
+
+/* ===== 深色模式 ===== */
+[data-theme="dark"] {
+  --color-bg: #0F0F1A;
+  --color-surface: #1A1A2E;
+  --color-border: #2A2A3E;
+  --color-border-light: #1E1E32;
+  --color-text: #E8E8EC;
+  --color-text-secondary: #A0A0B0;
+  --color-text-muted: #6B6B80;
+  --color-text-disabled: #4A4A5A;
+}
+
+[data-theme="dark"] body {
+  background-color: #0F0F1A;
+  color: #E8E8EC;
+}
+
+[data-theme="dark"] ::-webkit-scrollbar-thumb { background: #3A3A50; }
+[data-theme="dark"] ::selection { background: #2D1F6B; color: #C4B5FD; }
+
+/* ===== 重置 ===== */
+*, *::before, *::after { box-sizing: border-box; }
+
+html {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  background-color: var(--color-bg);
+  color: var(--color-text);
+  font-family: var(--font-sans);
+  line-height: 1.5;
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+a { color: inherit; text-decoration: none; }
+button { font-family: inherit; }
+
+/* ===== 滚动条 ===== */
+::-webkit-scrollbar { width: 5px; height: 5px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: #D6D3D1; border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: #A8A29E; }
+
+/* ===== 选择 ===== */
+::selection {
+  background-color: #EDE9FE;
+  color: #5B21B6;
+}
+
+/* ===== 聚焦 ===== */
+:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+/* ===== 页面过渡动画 ===== */
+@keyframes flow-slide-up {
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes flow-slide-down {
+  from { opacity: 0; transform: translateY(-8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes flow-fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes flow-scale-in {
+  from { opacity: 0; transform: scale(0.95); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+@keyframes flow-pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+
+@keyframes flow-count-up {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* ===== 实用类 ===== */
+.animate-slide-up { animation: flow-slide-up 0.3s ease both; }
+.animate-fade-in { animation: flow-fade-in 0.3s ease both; }
+.animate-scale-in { animation: flow-scale-in 0.25s ease both; }
+
+/* ===== Mobile 安全区 ===== */
+@supports (padding-bottom: env(safe-area-inset-bottom)) {
+  .safe-bottom {
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+}
+
+/* ===== 其他 ===== */
+input, textarea, select, button { font-family: inherit; }
+
+@media print {
+  .no-print { display: none !important; }
+}

@@ -1,0 +1,43 @@
+# Dependencies
+node_modules/
+.pnpm-store/
+
+# Turbo
+.turbo/
+
+# Build outputs
+dist/
+build/
+.next/
+.expo/
+
+# Environment
+.env
+.env.local
+.env.*.local
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Testing
+coverage/
+
+# Supabase
+supabase/.temp/
+
+# Package locks
+pnpm-lock.yaml
+
+# Debug
+*.log
+npm-debug.log*
+/apps/web/out/
+/apps/web/out.bak/
+/_tmp_*

@@ -1,0 +1,25 @@
+{
+  "name": "@flow/editor",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Markdown editor component for FlowOS",
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
+  "scripts": {
+    "lint": "tsc --noEmit",
+    "typecheck": "tsc --noEmit",
+    "clean": "rm -rf dist"
+  },
+  "dependencies": {
+    "@flow/types": "*",
+    "@flow/design-system": "*"
+  },
+  "devDependencies": {
+    "@types/react": "^19.0.0",
+    "react": "^19.0.0",
+    "typescript": "^5.7.0"
+  },
+  "peerDependencies": {
+    "react": "^19.0.0"
+  }
+}

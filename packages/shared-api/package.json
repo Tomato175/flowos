@@ -1,0 +1,21 @@
+{
+  "name": "@flow/api",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Supabase client wrapper and API helpers for FlowOS",
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
+  "scripts": {
+    "lint": "tsc --noEmit",
+    "typecheck": "tsc --noEmit",
+    "clean": "rm -rf dist"
+  },
+  "dependencies": {
+    "@flow/types": "*",
+    "@flow/db": "*",
+    "@supabase/supabase-js": "^2.49.0"
+  },
+  "devDependencies": {
+    "typescript": "^5.7.0"
+  }
+}

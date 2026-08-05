@@ -1,0 +1,35 @@
+{
+  "name": "flowos",
+  "version": "0.1.0",
+  "private": true,
+  "description": "心流OS - 开源个人生活中枢",
+  "workspaces": [
+    "packages/*",
+    "apps/web"
+  ],
+  "scripts": {
+    "dev:web": "npm run dev -w @flow/web",
+    "dev:mobile": "npm run dev -w @flow/mobile",
+    "build": "npm run build --workspaces --if-present",
+    "lint": "npm run lint --workspaces --if-present",
+    "typecheck": "npm run typecheck --workspaces --if-present",
+    "format": "prettier --write \"**/*.{ts,tsx,js,jsx,json,md}\"",
+    "format:check": "prettier --check \"**/*.{ts,tsx,js,jsx,json,md}\"",
+    "db:generate": "npm run db:generate -w @flow/db",
+    "db:migrate": "npm run db:migrate -w @flow/db",
+    "db:studio": "npm run db:studio -w @flow/db"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "prettier": "^3.4.0",
+    "typescript": "^5.7.0"
+  },
+  "engines": {
+    "node": ">=22.0.0"
+  },
+  "dependencies": {
+    "@supabase/ssr": "^0.12.4",
+    "@supabase/supabase-js": "^2.112.0",
+    "zustand": "^5.0.14"
+  }
+}
