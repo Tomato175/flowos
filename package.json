@@ -30,6 +30,6 @@
   "dependencies": {
     "@supabase/ssr": "^0.12.4",
     "@supabase/supabase-js": "^2.112.0",
-    "zustand": "^5.0.14"
+    "zustand": "^4.5.5"
   }
 }

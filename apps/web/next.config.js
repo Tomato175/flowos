@@ -10,6 +10,7 @@ const nextConfig = {
     '@flow/design-system',
     '@flow/hooks',
     '@flow/utils',
+    'zustand',
   ],
 };
 
