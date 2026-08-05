@@ -50,7 +50,7 @@ export default function FocusPage() {
     getTodayStats, workDuration, breakDuration,
   } = useFocusStore();
 
-  const { activeSound, setActiveSound, volume, setVolume, isPlaying, togglePlay } = useAudioStore();
+  const { activeSound, setActiveSound, volume, setVolume, isPlaying } = useAudioStore();
   const { tasks } = useTaskStore();
   const stats = getTodayStats();
 
