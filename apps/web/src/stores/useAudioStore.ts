@@ -34,8 +34,6 @@ interface AudioStore {
   stop: () => void;
   addCustomTrack: (track: CustomTrack) => void;
   removeCustomTrack: (id: string) => void;
-  syncFromCloud: (userId: string) => Promise<void>;
-  clearCloudTracks: () => void;
 }
 
 export const useAudioStore = create<AudioStore>()(
@@ -60,53 +58,9 @@ export const useAudioStore = create<AudioStore>()(
       togglePlay: () => set({ isPlaying: !get().isPlaying }),
       stop: () => set({ isPlaying: false, activeSound: null }),
 
-      addCustomTrack: (track) => {
-        const newTracks = [...get().customTracks, track];
-        set({ customTracks: newTracks });
-        // 立即同步写入 localStorage，避免刷新丢失
-        try {
-          const raw = localStorage.getItem('flowos-audio');
-          const existing = raw ? JSON.parse(raw) : {};
-          existing.state = { ...existing.state, customTracks: newTracks };
-          localStorage.setItem('flowos-audio', JSON.stringify(existing));
-        } catch { /* ignore */ }
-      },
+      addCustomTrack: (track) => set((s) => ({ customTracks: [...s.customTracks, track] })),
       removeCustomTrack: (id) => set((s) => ({ customTracks: s.customTracks.filter((t) => t.id !== id) })),
-      syncFromCloud: async (userId: string) => {
-        // 从 Supabase Storage 拉取并合并（不覆盖已存在的本地歌曲）
-        try {
-          const { createClient } = await import('@/lib/supabase');
-          const supabase = createClient();
-          const { data: files, error } = await supabase.storage.from('music').list(userId);
-          if (error || !files) return;
-          const existing = get().customTracks;
-          const existingUrls = new Set(existing.map((t) => t.url));
-          const newTracks = files
-            .filter((f) => f.name && !f.name.endsWith('-thumb.jpg'))
-            .map((f) => {
-              const { data: urlData } = supabase.storage.from('music').getPublicUrl(`${userId}/${f.name}`);
-              const url = urlData.publicUrl;
-              // Skip if this URL already exists in local tracks
-              if (existingUrls.has(url)) return null as any;
-              const trackId = 'custom-' + f.name.split('-')[0];
-              const displayName = f.name.replace(/^[^-]+-/, '').replace(/\.[^.]+$/, '');
-              return { id: trackId, name: displayName, url };
-            })
-            .filter(Boolean);
-          if (newTracks.length > 0) {
-            set({ customTracks: [...existing, ...newTracks] });
-          }
-        } catch { /* ignore */ }
-      },
-      clearCloudTracks: () => set({ customTracks: [], activeSound: null, isPlaying: false }),
     }),
-    { name: 'flowos-audio', partialize: (s) => ({ volume: s.volume, customTracks: s.customTracks, activeSound: s.activeSound }),
-  onRehydrateStorage: () => (state) => {
-    // 清理失效的 blob: URL（旧版无登录时上传的临时链接）
-    if (state?.customTracks) {
-      state.customTracks = state.customTracks.filter((t) => !t.url.startsWith('blob:'));
-    }
-  }
-},
+    { name: 'flowos-audio-v2', partialize: (s) => ({ volume: s.volume, customTracks: s.customTracks, activeSound: s.activeSound }) },
   ),
 );
