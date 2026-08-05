@@ -59,7 +59,7 @@ export function MiniPlayer() {
 
       const { data: urlData } = supabase.storage.from('music').getPublicUrl(filePath);
       addCustomTrack({ id: trackId, name: trackName, url: urlData.publicUrl });
-      setActiveSound(trackId);
+      // addCustomTrack already sets activeSound + isPlaying
     } catch (err) {
       console.error('Upload failed:', err);
       alert('上传失败，请重试');

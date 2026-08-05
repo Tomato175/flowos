@@ -58,7 +58,11 @@ export const useAudioStore = create<AudioStore>()(
       togglePlay: () => set({ isPlaying: !get().isPlaying }),
       stop: () => set({ isPlaying: false, activeSound: null }),
 
-      addCustomTrack: (track) => set((s) => ({ customTracks: [...s.customTracks, track] })),
+      addCustomTrack: (track) => set((s) => ({
+        customTracks: [...s.customTracks, track],
+        activeSound: track.id,
+        isPlaying: true,
+      })),
       removeCustomTrack: (id) => set((s) => ({ customTracks: s.customTracks.filter((t) => t.id !== id) })),
     }),
     { name: 'flowos-audio-v2', partialize: (s) => ({ volume: s.volume, customTracks: s.customTracks, activeSound: s.activeSound }) },
