@@ -61,6 +61,6 @@ export const useAudioStore = create<AudioStore>()(
       addCustomTrack: (track) => set((s) => ({ customTracks: [...s.customTracks, track] })),
       removeCustomTrack: (id) => set((s) => ({ customTracks: s.customTracks.filter((t) => t.id !== id) })),
     }),
-    { name: 'flowos-audio', partialize: (s) => ({ volume: s.volume }) },
+    { name: 'flowos-audio', partialize: (s) => ({ volume: s.volume, customTracks: s.customTracks }) },
   ),
 );

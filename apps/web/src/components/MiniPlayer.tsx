@@ -3,9 +3,12 @@
 import { useEffect, useRef } from 'react';
 import { useAudioStore, AMBIENT_SOUNDS, type CustomTrack } from '@/stores/useAudioStore';
 import { playAmbient, setAmbientVolume, stopAmbient } from '@/lib/audio-engine';
+import { createClient } from '@/lib/supabase';
+import { useAuth } from '@/lib/auth-context';
 
 export function MiniPlayer() {
   const { activeSound, volume, isPlaying, setActiveSound, setVolume, togglePlay, stop, customTracks, addCustomTrack } = useAudioStore();
+  const { user } = useAuth();
   const sound = AMBIENT_SOUNDS.find((s) => s.id === activeSound);
   const customTrack = customTracks.find((t) => t.id === activeSound);
   const fileRef = useRef<HTMLInputElement>(null);
@@ -26,7 +29,7 @@ export function MiniPlayer() {
     setAmbientVolume(volume);
   }, [volume]);
 
-  const handleUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
     if (!files || files.length === 0) return;
     const file = files[0]!;
@@ -34,14 +37,35 @@ export function MiniPlayer() {
       alert('请选择音频文件 (MP3/WAV/OGG)');
       return;
     }
-    const url = URL.createObjectURL(file);
-    const track: CustomTrack = {
-      id: 'custom-' + Date.now().toString(36),
-      name: file.name.replace(/\.[^.]+$/, ''),
-      url,
-    };
-    addCustomTrack(track);
-    setActiveSound(track.id);
+
+    const trackId = 'custom-' + Date.now().toString(36);
+    const trackName = file.name.replace(/\.[^.]+$/, '');
+
+    try {
+      if (user) {
+        // Upload to Supabase Storage for persistence across sessions
+        const supabase = createClient();
+        const filePath = `${user.id}/${trackId}-${file.name}`;
+        const { error: uploadError } = await supabase.storage
+          .from('music')
+          .upload(filePath, file, { upsert: true });
+
+        if (uploadError) throw uploadError;
+
+        const { data: urlData } = supabase.storage.from('music').getPublicUrl(filePath);
+        addCustomTrack({ id: trackId, name: trackName, url: urlData.publicUrl });
+        setActiveSound(trackId);
+      } else {
+        // Not logged in - use Blob URL (won't survive page reload)
+        addCustomTrack({ id: trackId, name: trackName, url: URL.createObjectURL(file) });
+        setActiveSound(trackId);
+      }
+    } catch (err) {
+      console.error('Upload failed:', err);
+      alert('上传失败，请重试');
+    }
+    // Reset file input
+    e.target.value = '';
   };
 
   if (!activeSound && !isPlaying) return null;
