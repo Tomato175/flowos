@@ -32,6 +32,13 @@ export function MiniPlayer() {
   const handleUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
     if (!files || files.length === 0) return;
+    e.target.value = ''; // reset early so user can re-upload same file
+
+    if (!user) {
+      alert('请先登录后再上传音乐（音乐需要保存到云端才能持久化）');
+      return;
+    }
+
     const file = files[0]!;
     if (!file.type.startsWith('audio/')) {
       alert('请选择音频文件 (MP3/WAV/OGG)');
@@ -42,30 +49,21 @@ export function MiniPlayer() {
     const trackName = file.name.replace(/\.[^.]+$/, '');
 
     try {
-      if (user) {
-        // Upload to Supabase Storage for persistence across sessions
-        const supabase = createClient();
-        const filePath = `${user.id}/${trackId}-${file.name}`;
-        const { error: uploadError } = await supabase.storage
-          .from('music')
-          .upload(filePath, file, { upsert: true });
+      const supabase = createClient();
+      const filePath = `${user.id}/${trackId}-${file.name}`;
+      const { error: uploadError } = await supabase.storage
+        .from('music')
+        .upload(filePath, file, { upsert: true });
 
-        if (uploadError) throw uploadError;
+      if (uploadError) throw uploadError;
 
-        const { data: urlData } = supabase.storage.from('music').getPublicUrl(filePath);
-        addCustomTrack({ id: trackId, name: trackName, url: urlData.publicUrl });
-        setActiveSound(trackId);
-      } else {
-        // Not logged in - use Blob URL (won't survive page reload)
-        addCustomTrack({ id: trackId, name: trackName, url: URL.createObjectURL(file) });
-        setActiveSound(trackId);
-      }
+      const { data: urlData } = supabase.storage.from('music').getPublicUrl(filePath);
+      addCustomTrack({ id: trackId, name: trackName, url: urlData.publicUrl });
+      setActiveSound(trackId);
     } catch (err) {
       console.error('Upload failed:', err);
       alert('上传失败，请重试');
     }
-    // Reset file input
-    e.target.value = '';
   };
 
   if (!activeSound && !isPlaying) return null;

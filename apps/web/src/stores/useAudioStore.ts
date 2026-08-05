@@ -61,6 +61,13 @@ export const useAudioStore = create<AudioStore>()(
       addCustomTrack: (track) => set((s) => ({ customTracks: [...s.customTracks, track] })),
       removeCustomTrack: (id) => set((s) => ({ customTracks: s.customTracks.filter((t) => t.id !== id) })),
     }),
-    { name: 'flowos-audio', partialize: (s) => ({ volume: s.volume, customTracks: s.customTracks, activeSound: s.activeSound }) },
+    { name: 'flowos-audio', partialize: (s) => ({ volume: s.volume, customTracks: s.customTracks, activeSound: s.activeSound }),
+  onRehydrateStorage: () => (state) => {
+    // 清理失效的 blob: URL（旧版无登录时上传的临时链接）
+    if (state?.customTracks) {
+      state.customTracks = state.customTracks.filter((t) => !t.url.startsWith('blob:'));
+    }
+  }
+},
   ),
 );
