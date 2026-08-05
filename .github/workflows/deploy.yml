@@ -1,4 +1,4 @@
-name: Deploy to GitHub Pages
+aname: Deploy to GitHub Pages
 
 on:
   push:
@@ -22,7 +22,7 @@ jobs:
           cache: "npm"
 
       - name: Install dependencies
-        run:npm install
+        run: npm install
 
       - name: Build
         env:
