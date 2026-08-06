@@ -113,7 +113,7 @@ export const useTaskStore = create<TaskStore>()(
           ),
         })),
 
-      hydrateFromCloud: (cloudTasks) => set({ tasks: cloudTasks }),
+      hydrateFromCloud: (cloudTasks) => { if (cloudTasks.length > 0) set({ tasks: cloudTasks }); },
     }),
     { name: 'flowos-tasks' },
   ),

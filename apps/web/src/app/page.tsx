@@ -23,10 +23,10 @@ export default function HomePage() {
       const redirect = () => router.replace('/today');
       const timeoutId = setTimeout(redirect, 3000);
       isSupabaseReady()
-        .then((ready) => {
+        .then(async (ready) => {
           if (ready) {
-            migrateFromLocal(user.id);
-            loadFromCloud(user.id);
+            await migrateFromLocal(user.id);
+            await loadFromCloud(user.id);
             setTimeout(redirect, 1000);
           }
           else redirect();

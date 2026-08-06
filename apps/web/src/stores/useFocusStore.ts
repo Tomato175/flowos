@@ -178,7 +178,7 @@ export const useFocusStore = create<FocusStore>()(
         };
       },
 
-      hydrateSessions: (cloudSessions) => set({ sessions: cloudSessions }),
+      hydrateSessions: (cloudSessions) => { if (cloudSessions.length > 0) set({ sessions: cloudSessions }); },
     }),
     { name: 'flowos-focus' },
   ),

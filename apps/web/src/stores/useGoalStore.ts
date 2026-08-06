@@ -114,7 +114,7 @@ export const useGoalStore = create<GoalStore>()(
 
       getActiveObjectives: () => get().objectives.filter((o) => o.status === 'active'),
 
-      hydrateFromCloud: (cloudObjectives) => set({ objectives: cloudObjectives }),
+      hydrateFromCloud: (cloudObjectives) => { if (cloudObjectives.length > 0) set({ objectives: cloudObjectives }); },
     }),
     { name: 'flowos-goals' },
   ),

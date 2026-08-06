@@ -70,7 +70,7 @@ export const useNoteStore = create<NoteStore>()(
         return [...matches].map((m) => m[1]!);
       },
 
-      hydrateFromCloud: (cloudNotes) => set({ notes: cloudNotes }),
+      hydrateFromCloud: (cloudNotes) => { if (cloudNotes.length > 0) set({ notes: cloudNotes }); },
     }),
     { name: 'flowos-notes' },
   ),

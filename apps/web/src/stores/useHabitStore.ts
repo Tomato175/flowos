@@ -105,7 +105,11 @@ export const useHabitStore = create<HabitStore>()(
 
       getActiveHabits: () => get().habits.filter((h) => !h.isArchived),
 
-      hydrateFromCloud: (cloudHabits, cloudLogs) => set({ habits: cloudHabits, logs: cloudLogs }),
+      hydrateFromCloud: (cloudHabits, cloudLogs) => {
+        if (cloudHabits.length > 0 || cloudLogs.length > 0) {
+          set({ habits: cloudHabits, logs: cloudLogs });
+        }
+      },
     }),
     { name: 'flowos-habits' },
   ),
