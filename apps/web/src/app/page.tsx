@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/lib/auth-context';
-import { isSupabaseReady, migrateFromLocal, loadFromCloud } from '@/lib/sync';
+import { isSupabaseReady, migrateFromLocal } from '@/lib/sync';
 import { createClient } from '@/lib/supabase';
 
 export default function HomePage() {
@@ -26,10 +26,9 @@ export default function HomePage() {
         .then(async (ready) => {
           if (ready) {
             await migrateFromLocal(user.id);
-            await loadFromCloud(user.id);
-            setTimeout(redirect, 1000);
+            // sync-engine 会自动在进入主界面后加载云端数据
           }
-          else redirect();
+          redirect();
         })
         .catch(redirect)
         .finally(() => clearTimeout(timeoutId));
